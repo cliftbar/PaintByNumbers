@@ -31,7 +31,7 @@ addEventListener('message', async (e) => {
 
     let output = new Uint8Array(e.data.bytes.length)
     console.log("dominantColor start")
-    let ret = await dominantColor(e.data.height, e.data.width, 10, 10, 5, e.data.bytes, output)
+    let ret = await dominantColor(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, e.data.numColors, e.data.bytes, output)
     console.log(ret)
     console.log("dominantColor end")
     // let retMap = result.instance.exports.dominantColor(e.data.height, e.data.width, e.data.bytes)

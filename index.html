@@ -15,6 +15,16 @@
             <label for="img">Select image:</label>
             <input type="file" id="img" name="img" accept="image/*">
         </form>
+        <form>
+            <label for="inpt_height_factor">Height Reduction Factor (height / x):</label>
+            <input type="number" min="1" value="10" step="1" id="inpt_height_factor">
+
+            <label for="inpt_width_factor">Width Reduction Factor (width / y):</label>
+            <input type="number" min="1" value="10" step="1" id="inpt_width_factor">
+
+            <label for="inpt_num_colors">Number of colors:</label>
+            <input type="number" min="0" value="5" step="1" id="inpt_num_colors">
+        </form>
         <button onclick="workerJsDominantColor()">Run Go</button>
     </div>
 

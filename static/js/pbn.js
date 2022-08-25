@@ -44,12 +44,24 @@ function workerJsDominantColor() {
     let table = document.getElementById("tbl_color_palette")
     table.innerHTML = ""
 
+    let heightFactor = parseInt(document.getElementById("inpt_height_factor").value);
+    let widthFactor = parseInt(document.getElementById("inpt_width_factor").value);
+    let numColors = parseInt(document.getElementById("inpt_num_colors").value);
+
     let img = new Image();
     img.src = document.getElementById("img_uploaded").src
     let worker = getWorker()
     window.worker = worker.webWorker
     console.log(worker.webWorker)
-    useWorker(worker, {"bytes": fileByteArrayBuf, "height": img.height, "width": img.width}, (data) => {
+    let params = {
+        "bytes": fileByteArrayBuf,
+        "height": img.height,
+        "width": img.width,
+        "heightFactor": heightFactor,
+        "widthFactor": widthFactor,
+        "numColors": numColors
+    }
+    useWorker(worker, params, (data) => {
         console.log(data)
     }).then(() => console.log("use worker done"));
     console.log(worker.webWorker)
