@@ -7,6 +7,7 @@ import (
 	clf "github.com/lucasb-eyer/go-colorful"
 	"github.com/muesli/clusters"
 	"github.com/nfnt/resize"
+	_ "golang.org/x/image/webp"
 	"image"
 	_ "image/jpeg"
 	"image/png"
