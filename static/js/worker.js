@@ -1,6 +1,4 @@
-
-
-
+//https://blog.boot.dev/golang/running-go-in-the-browser-wasm-web-workers/
 addEventListener("error", (e) => {
     postMessage({
         message: e
