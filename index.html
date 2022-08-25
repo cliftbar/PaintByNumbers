@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Odin Storm Calculator</title>
+    <!--    <script src="/static/js/wasm_exec.js"></script>-->
+    <script src="/static/js/pbn.js"></script>
+</head>
+
+<body>
+
+    <div id="controls">
+
+    <form onchange="readURL(event);">
+        <label for="img">Select image:</label>
+        <input type="file" id="img" name="img" accept="image/*">
+    </form>
+    <button onclick="workerJsDominantColor()">Run Go</button>
+    </div>
+
+    <div>
+        <img id="img_uploaded" src="#" alt="your image" />
+    </div>
+
+    <div>
+        <table id="tbl_color_palette"></table>
+        <img id="img_altered" src="#" alt="pixelized image" />
+    </div>
+
+
+</body>
+</html>
