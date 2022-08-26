@@ -1,0 +1,8 @@
+img.before {
+    float: left;
+    max-width: 50%;
+}
+img.after {
+    /*float: right;*/
+    max-width: 50%;
+}

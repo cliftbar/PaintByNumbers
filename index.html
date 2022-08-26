@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <title>Pixelizor</title>
     <!--    <script src="/static/js/wasm_exec.js"></script>-->
+    <link rel="stylesheet" href="/static/css/pbn.css">
     <script src="/static/js/pbn.js"></script>
 </head>
 
 <body>
-
     <div id="controls">
-        <p>This isn't very good, if it's stuck spinning, the input file is probably too big, and it may or may not finish processing.  Currently supports jpg, png, and webp formats</p>
+        <h1>Pixelizor</h1>
+        <p>If it's stuck spinning, the input file is probably too big, and it may or may not finish processing.  ~1000x1000 px: ~5s, ~4000x3000 px: many minutes.  Currently supports jpg, png, and webp formats.</p>
         <form onchange="readURL(event);">
             <label for="img">Select image:</label>
             <input type="file" id="img" name="img" accept="image/*">
@@ -24,17 +25,26 @@
 
             <label for="inpt_num_colors">Number of colors:</label>
             <input type="number" min="0" value="5" step="1" id="inpt_num_colors">
+
+            <label for="inpt_delta_threshold">Delta Threshold (kmeans tuning, dunno what it does):</label>
+            <input type="number" min="0" value="0.01" id="inpt_delta_threshold">
         </form>
-        <button onclick="workerJsDominantColor()">Run Go</button>
+        <div>
+            <button onclick="workerPixelizor()">Run Pixelizor</button>
+        </div>
+        <div>
+            <button onclick="workerDominantColors()">Generate Colors</button>
+            <button onclick="workerPixelizeFromPalette()">Apply Colors</button>
+        </div>
+    </div>
+    <div>
+        <p>Detected colors appear here.  Use "Generate Colors" to only create a color palette.  Colors are auto-detected using kmeans, so results will vary with repeated calculations.  CLick "Apply Colors" to run or rerun the pixelization progress.  Autodetected colors can be manually changed, useful if a small area of accent color isn't detected.</p>
+        <div id="div_color_palette"></div>
     </div>
 
     <div>
-        <img id="img_uploaded" src="#" alt="your image" />
-    </div>
-
-    <div>
-        <table id="tbl_color_palette"></table>
-        <img id="img_altered" src="#" alt="pixelized image" />
+        <img class="before" id="img_uploaded" src="#" alt="your image" />
+        <img class="after" id="img_altered" src="#" alt="pixelized image" />
     </div>
 
 

@@ -1,107 +1,57 @@
 package main
 
-// tinygo main
 import (
 	"bytes"
 	"fmt"
 	clf "github.com/lucasb-eyer/go-colorful"
-	"github.com/muesli/clusters"
 	"github.com/nfnt/resize"
 	_ "golang.org/x/image/webp"
 	"image"
 	_ "image/jpeg"
 	"image/png"
 	"paintByNumbers/pbn"
+	"strings"
 	"syscall/js"
 	"time"
 )
 
-// var imgBuf *bytes.Buffer
-var inputImageBytes []uint8
-
-// Pin buffer to global, so it doesn't get GC'd
-func asyncResize(imgRgb image.Image, widthX uint, heightY uint) <-chan image.Image {
-	r := make(chan image.Image)
-
-	go func() {
-		defer close(r)
-		r <- resize.Resize(widthX, heightY, imgRgb, resize.NearestNeighbor)
-	}()
-
-	return r
-}
-
-func asyncDominantColors(imgRgb image.Image, clusterCount int, deltaThreshold float64) <-chan clusters.Clusters {
-	r := make(chan clusters.Clusters)
-
-	go func() {
-		defer close(r)
-		fmt.Println("start dom colors")
-		r <- pbn.DominantColors(imgRgb, clusterCount, deltaThreshold, false)
-	}()
-
-	return r
-}
-func asyncSnapColors(imgRgb image.Image, colorPalette clusters.Clusters) <-chan image.Image {
-	r := make(chan image.Image)
-
-	go func() {
-		defer close(r)
-		r <- pbn.SnapColors(imgRgb, colorPalette)
-	}()
-
-	return r
-}
-
-// func dominantColor(height int, width int, inputImageBytes []byte) interface{} {
-func dominantColor(this js.Value, i []js.Value) interface{} {
+func pixelizor(this js.Value, i []js.Value) interface{} {
 	start := time.Now()
-	//if len(i)+1 < 3 {
-	//	fmt.Println("Not enough arguments")
-	//} else {
-	//	fmt.Println("Calculating colors")
-	//}
 
-	//fmt.Println(i[0])
-	//fmt.Println(i[1])
-	//fmt.Println(i[2])
 	height := i[0].Int()
 	width := i[1].Int()
 	widthXScalar := i[2].Int()
 	heightYScalar := i[3].Int()
 	clusterCount := i[4].Int()
-	//
-	array := i[5]
-	//fmt.Println(array.Get("byteLength"))
-	//pixelCount := height * width
-	srcLen := array.Get("byteLength").Int()
-	inputImageBytes = make([]uint8, srcLen)
-	js.CopyBytesToGo(inputImageBytes, array)
-	//inputImageBytes := make([]byte, 10)
-	//fmt.Println(inputImageBytes)
-	fmt.Printf("decode image %f\n", time.Since(start).Seconds())
+	deltaThreshold := i[5].Float()
+	srcArrayJS := i[6]
+
+	outputBuffer := i[7]
+
+	srcLen := srcArrayJS.Get("byteLength").Int()
+	inputImageBytes := make([]uint8, srcLen)
+	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
+	fmt.Printf("src bytes copied %f\n", time.Since(start).Seconds())
+
 	imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
 	fmt.Printf("decode image done %f\n", time.Since(start).Seconds())
 	if err != nil {
 		panic("unable to read image")
 	}
-
 	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
-	fmt.Printf("image resize %f\n", time.Since(start).Seconds())
-	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
-	//resizedImgRgb := <-asyncResize(imgRgb, uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar))
-	fmt.Printf("Calculating colors %f\n", time.Since(start).Seconds())
-	colorPalette := pbn.DominantColors(resizedImgRgb, clusterCount, 0.01, false)
-	//colorPalette := <-asyncDominantColors(resizedImgRgb, clusterCount, 0.01)
-	fmt.Printf("color palette found %f\n", time.Since(start).Seconds())
-	snapImg := pbn.SnapColors(resizedImgRgb, colorPalette)
-	//snapImg := <-asyncSnapColors(resizedImgRgb, colorPalette)
 
+	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
+	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
+
+	colorPalette := pbn.DominantColors(resizedImgRgb, clusterCount, deltaThreshold, false)
+	fmt.Printf("color palette found %f\n", time.Since(start).Seconds())
+
+	snapImg := pbn.SnapColors(resizedImgRgb, colorPalette)
 	fmt.Printf("snap done %f\n", time.Since(start).Seconds())
 
 	newImage := resize.Resize(uint(imgRgb.Bounds().Size().X), uint(imgRgb.Bounds().Size().Y), snapImg, resize.NearestNeighbor)
 	fmt.Printf("resize up done %f\n", time.Since(start).Seconds())
-	//newImage := <-asyncResize(snapImg, uint(imgRgb.Bounds().Size().X), uint(imgRgb.Bounds().Size().Y))
+
 	var imgBuf *bytes.Buffer
 	var bufBytes []uint8
 
@@ -109,19 +59,13 @@ func dominantColor(this js.Value, i []js.Value) interface{} {
 	_ = png.Encode(imgBuf, newImage)
 	bufBytes = imgBuf.Bytes()
 
-	//buffHeader := unsafe.Pointer(&bufBytes)
-	output := i[6]
-	js.CopyBytesToJS(output, bufBytes)
-	fmt.Printf("output copy done %f\n", time.Since(start).Seconds())
+	js.CopyBytesToJS(outputBuffer, bufBytes)
+	fmt.Printf("outputBuffer bytes copied %f\n", time.Since(start).Seconds())
 
 	colorPaletteHex := make([]string, 0)
 	colorPaletteHexStr := ""
-	for _, centroid := range colorPalette {
-		hex := clf.Color{
-			R: centroid.Center[0] / 255.0,
-			G: centroid.Center[1] / 255.0,
-			B: centroid.Center[2] / 255.0,
-		}.Hex()
+	for _, c := range colorPalette {
+		hex := c.Hex()
 		colorPaletteHex = append(colorPaletteHex, hex)
 		if colorPaletteHexStr == "" {
 			colorPaletteHexStr = hex
@@ -130,19 +74,113 @@ func dominantColor(this js.Value, i []js.Value) interface{} {
 		}
 	}
 
-	//retMap := map[string]interface{}{
-	//	//"imgPtr":    js.ValueOf(bufBytes),
-	//	"colors": colorPaletteHexStr,
-	//}
+	fmt.Printf("Wasm Done %fs\n", time.Since(start).Seconds())
+	return js.ValueOf(colorPaletteHexStr)
+}
 
-	//js.CopyBytesToJS(, bufBytes)
+func dominantColors(this js.Value, i []js.Value) interface{} {
+	start := time.Now()
+
+	height := i[0].Int()
+	width := i[1].Int()
+	widthXScalar := i[2].Int()
+	heightYScalar := i[3].Int()
+	clusterCount := i[4].Int()
+	deltaThreshold := i[5].Float()
+	srcArrayJS := i[6]
+
+	srcLen := srcArrayJS.Get("byteLength").Int()
+	inputImageBytes := make([]uint8, srcLen)
+	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
+	fmt.Printf("src bytes copied %f\n", time.Since(start).Seconds())
+
+	imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	fmt.Printf("decode image done %f\n", time.Since(start).Seconds())
+	if err != nil {
+		panic("unable to read image")
+	}
+	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
+
+	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
+	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
+
+	colorPalette := pbn.DominantColors(resizedImgRgb, clusterCount, deltaThreshold, false)
+	fmt.Printf("color palette found, %d clusters, %f threshold %f\n", clusterCount, deltaThreshold, time.Since(start).Seconds())
+
+	colorPaletteHex := make([]string, 0)
+	colorPaletteHexStr := ""
+	for _, c := range colorPalette {
+		hex := c.Hex()
+		colorPaletteHex = append(colorPaletteHex, hex)
+		if colorPaletteHexStr == "" {
+			colorPaletteHexStr = hex
+		} else {
+			colorPaletteHexStr = colorPaletteHexStr + "," + hex
+		}
+	}
 
 	fmt.Printf("Wasm Done %fs\n", time.Since(start).Seconds())
 	return js.ValueOf(colorPaletteHexStr)
 }
 
+func pixelizeFromPalette(this js.Value, i []js.Value) interface{} {
+	start := time.Now()
+
+	height := i[0].Int()
+	width := i[1].Int()
+	widthXScalar := i[2].Int()
+	heightYScalar := i[3].Int()
+	colorsHexString := i[4].String()
+	srcArrayJS := i[5]
+
+	outputBuffer := i[6]
+
+	colorsHex := strings.Split(colorsHexString, ",")
+	colorPalette := make([]clf.Color, 0)
+	for _, cHex := range colorsHex {
+		c, _ := clf.Hex(cHex)
+		colorPalette = append(colorPalette, c)
+	}
+
+	srcLen := srcArrayJS.Get("byteLength").Int()
+	inputImageBytes := make([]uint8, srcLen)
+	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
+	fmt.Printf("src bytes copied %f\n", time.Since(start).Seconds())
+
+	imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	fmt.Printf("decode image done %f\n", time.Since(start).Seconds())
+	if err != nil {
+		panic("unable to read image")
+	}
+	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
+
+	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
+	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
+
+	snapImg := pbn.SnapColors(resizedImgRgb, colorPalette)
+	fmt.Printf("snap done %f\n", time.Since(start).Seconds())
+
+	newImage := resize.Resize(uint(imgRgb.Bounds().Size().X), uint(imgRgb.Bounds().Size().Y), snapImg, resize.NearestNeighbor)
+	fmt.Printf("resize up done %f\n", time.Since(start).Seconds())
+
+	var imgBuf *bytes.Buffer
+	var bufBytes []uint8
+
+	imgBuf = new(bytes.Buffer)
+	_ = png.Encode(imgBuf, newImage)
+	bufBytes = imgBuf.Bytes()
+
+	js.CopyBytesToJS(outputBuffer, bufBytes)
+	fmt.Printf("outputBuffer bytes copied %f\n", time.Since(start).Seconds())
+
+	fmt.Printf("Wasm Done %fs\n", time.Since(start).Seconds())
+	return js.ValueOf("done")
+}
+
 func registerCallbacks() {
-	js.Global().Set("dominantColor", js.FuncOf(dominantColor))
+	js.Global().Set("pixelizor", js.FuncOf(pixelizor))
+	js.Global().Set("dominantColors", js.FuncOf(dominantColors))
+	js.Global().Set("pixelizeFromPalette", js.FuncOf(pixelizeFromPalette))
 }
 
 func main() {

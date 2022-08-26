@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/muesli/clusters"
+	clf "github.com/lucasb-eyer/go-colorful"
 	"github.com/nfnt/resize"
 	"image"
 	_ "image/jpeg"
@@ -27,8 +27,8 @@ func asyncResize(imgRgb image.Image, widthX uint, heightY uint) <-chan image.Ima
 	return r
 }
 
-func asyncDominantColors(imgRgb image.Image, clusterCount int, deltaThreshold float64) <-chan clusters.Clusters {
-	r := make(chan clusters.Clusters)
+func asyncDominantColors(imgRgb image.Image, clusterCount int, deltaThreshold float64) <-chan []clf.Color {
+	r := make(chan []clf.Color)
 
 	go func() {
 		defer close(r)
@@ -38,7 +38,7 @@ func asyncDominantColors(imgRgb image.Image, clusterCount int, deltaThreshold fl
 
 	return r
 }
-func asyncSnapColors(imgRgb image.Image, colorPalette clusters.Clusters) <-chan image.Image {
+func asyncSnapColors(imgRgb image.Image, colorPalette []clf.Color) <-chan image.Image {
 	r := make(chan image.Image)
 
 	go func() {

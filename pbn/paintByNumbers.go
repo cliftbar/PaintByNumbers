@@ -1,7 +1,6 @@
 package pbn
 
 import (
-	"fmt"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	clf "github.com/lucasb-eyer/go-colorful"
@@ -18,19 +17,16 @@ import (
 
 func LoadImage(imgPath string) image.Image {
 	existingImageFile, err := os.Open(filepath.Clean(imgPath))
-	fmt.Println(existingImageFile.Stat())
 	if err != nil {
 		panic(err)
 	}
 	defer existingImageFile.Close()
 
-	imageData, imageType, err := image.Decode(existingImageFile)
+	imageData, _, err := image.Decode(existingImageFile)
 
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(imageType)
 
 	return imageData
 }
@@ -56,7 +52,7 @@ func PlotColorPalette(data []opts.BarData) {
 }
 
 // DominantColors cluster default: 5, deltaThreshold .01
-func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, doPlot bool) clusters.Clusters {
+func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, doPlot bool) []clf.Color {
 	var d clusters.Observations
 
 	for x := 0; x < img.Bounds().Size().X; x++ {
@@ -68,16 +64,15 @@ func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, d
 		}
 	}
 
-	fmt.Println("start kmeans")
 	kmm, _ := km.NewWithOptions(deltaThreshold, nil)
 	centroidColors, err := kmm.Partition(d, clusterCount)
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Println(centroidColors)
+
 	total := float32(img.Bounds().Size().X * img.Bounds().Size().Y)
 	items := make([]opts.BarData, 0)
-	for i, centroid := range centroidColors {
+	for _, centroid := range centroidColors {
 		pct := float32(len(centroid.Observations)) / total * 100.0
 
 		c := clf.Color{
@@ -91,21 +86,15 @@ func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, d
 			BorderColor: c.Hex(),
 		}
 		items = append(items, opts.BarData{Value: pct, ItemStyle: &style})
-
-		fmt.Printf("%d: centroid: %s, %f%%\n", i, centroid.Center, pct)
 	}
 
 	if doPlot {
 		PlotColorPalette(items)
 	}
 
-	return centroidColors
-}
-
-func SnapColors(img image.Image, palette clusters.Clusters) *image.RGBA {
 	colorPalette := make([]clf.Color, 0)
 
-	for _, centroid := range palette {
+	for _, centroid := range centroidColors {
 		colorPalette = append(colorPalette, clf.Color{
 			R: centroid.Center[0] / 255.0,
 			G: centroid.Center[1] / 255.0,
@@ -113,6 +102,10 @@ func SnapColors(img image.Image, palette clusters.Clusters) *image.RGBA {
 		})
 	}
 
+	return colorPalette
+}
+
+func SnapColors(img image.Image, colorPalette []clf.Color) *image.RGBA {
 	outputImg := image.NewRGBA(img.Bounds())
 
 	for x := 0; x < img.Bounds().Size().X; x++ {

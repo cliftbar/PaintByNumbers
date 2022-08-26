@@ -22,7 +22,7 @@ func main() {
 	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXFactor), uint(imgRgb.Bounds().Size().Y/heightYFactor), imgRgb, resize.NearestNeighbor)
 
 	fmt.Println("image loaded")
-	colorPalette := pbn.DominantColors(imgRgb, 5, 0.01)
+	colorPalette := pbn.DominantColors(imgRgb, 5, 0.01, true)
 	fmt.Println("color palette found")
 	snapImg := pbn.SnapColors(resizedImgRgb, colorPalette)
 	fmt.Println("snap done")

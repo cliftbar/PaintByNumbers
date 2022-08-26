@@ -6,8 +6,10 @@ addEventListener("error", (e) => {
 }, false);
 
 addEventListener('message', async (e) => {
+    // Load golang wasm exec script
     // importScripts("/static/js/wasm_exec.js")
     importScripts("/static/js/wasm_exec_tiny.js")
+
     // initialize the Go WASM glue
     const go = new self.Go();
 
@@ -16,33 +18,45 @@ addEventListener('message', async (e) => {
     const result = await WebAssembly.instantiateStreaming(fetch("/static/wasm/tinypbn.wasm"), go.importObject);
 
     // hijack the console.log function to capture stdout
-    let oldLog = console.log;
     // send each line of output to the main thread
+    let oldLog = console.log;
     console.log = (line) => { postMessage({
         message: line
     }); };
-    // console.log(e.data)
 
-    // run the code
-
+    // Start wasm process
+    console.log("wasm start")
     go.run(result.instance);
+    let retData = {
+        "target": e.data.target
+    }
+    if (e.data.target === "pixelizor") {
+        // Run method
+        let output = new Uint8Array(e.data.bytes.length)
 
-    let output = new Uint8Array(e.data.bytes.length)
-    console.log("dominantColor start")
-    let ret = await dominantColor(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, e.data.numColors, e.data.bytes, output)
-    console.log(ret)
-    console.log("dominantColor end")
-    // let retMap = result.instance.exports.dominantColor(e.data.height, e.data.width, e.data.bytes)
-    // console.log(output)
-    // const content = new Uint8Array(result.instance.exports.mem.buffer.slice(retMap.imgPtr, retMap.imgPtr + retMap.imgPtrLen));
-    console.log("dida thing")
+        let ret = await pixelizor(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, e.data.numColors, 0.01, e.data.bytes, output)
+
+        retData["img"] = output
+        retData["colors"] = ret.split(",")
+    } else if (e.data.target === "dominantColors") {
+        let ret = await dominantColors(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, e.data.numColors, e.data.deltaThreshold, e.data.bytes)
+        retData["colors"] = ret.split(",")
+    } else if (e.data.target === "pixelizeFromPalette") {
+        let output = new Uint8Array(e.data.bytes.length)
+        let paletteString = e.data.palette.join(",")
+
+        let ret = await pixelizeFromPalette(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, paletteString, e.data.bytes, output)
+        retData["img"] = output
+    } else {
+        retData["success"] = false
+        retData["reason"] = "unknown wasm method"
+    }
     console.log = oldLog;
 
     // tell the main thread we are done
     postMessage({
         "done": true,
-        "img": output,
-        "colors": ret.split(",")
+        "wasmPayload": retData
     });
     self.close()
 }, false);
