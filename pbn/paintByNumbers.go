@@ -11,8 +11,10 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"math"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func LoadImage(imgPath string) image.Image {
@@ -53,42 +55,45 @@ func PlotColorPalette(data []opts.BarData) {
 
 // DominantColors cluster default: 5, deltaThreshold .01
 func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, doPlot bool) []clf.Color {
-	var d clusters.Observations
+	var obs clusters.Observations
 
 	for x := 0; x < img.Bounds().Size().X; x++ {
 		for y := 0; y < img.Bounds().Size().Y; y++ {
 			r, g, b, _ := img.At(x, y).RGBA()
-			d = append(d, clusters.Coordinates{
+			obs = append(obs, clusters.Coordinates{
 				float64(r) / 255.0, float64(g) / 255.0, float64(b) / 255.0,
 			})
 		}
 	}
 
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(obs), func(i, j int) { obs[i], obs[j] = obs[j], obs[i] })
+
 	kmm, _ := km.NewWithOptions(deltaThreshold, nil)
-	centroidColors, err := kmm.Partition(d, clusterCount)
+	centroidColors, err := kmm.Partition(obs, clusterCount)
 	if err != nil {
 		panic(err)
 	}
 
-	total := float32(img.Bounds().Size().X * img.Bounds().Size().Y)
-	items := make([]opts.BarData, 0)
-	for _, centroid := range centroidColors {
-		pct := float32(len(centroid.Observations)) / total * 100.0
-
-		c := clf.Color{
-			R: centroid.Center[0] / 255.0,
-			G: centroid.Center[1] / 255.0,
-			B: centroid.Center[2] / 255.0,
-		}
-		style := opts.ItemStyle{
-			Color:       c.Hex(),
-			Color0:      c.Hex(),
-			BorderColor: c.Hex(),
-		}
-		items = append(items, opts.BarData{Value: pct, ItemStyle: &style})
-	}
-
 	if doPlot {
+		total := float32(img.Bounds().Size().X * img.Bounds().Size().Y)
+		items := make([]opts.BarData, 0)
+		for _, centroid := range centroidColors {
+			pct := float32(len(centroid.Observations)) / total * 100.0
+
+			c := clf.Color{
+				R: centroid.Center[0] / 255.0,
+				G: centroid.Center[1] / 255.0,
+				B: centroid.Center[2] / 255.0,
+			}
+			style := opts.ItemStyle{
+				Color:       c.Hex(),
+				Color0:      c.Hex(),
+				BorderColor: c.Hex(),
+			}
+			items = append(items, opts.BarData{Value: pct, ItemStyle: &style})
+		}
+
 		PlotColorPalette(items)
 	}
 

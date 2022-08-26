@@ -39,13 +39,13 @@ addEventListener('message', async (e) => {
         retData["img"] = output
         retData["colors"] = ret.split(",")
     } else if (e.data.target === "dominantColors") {
-        let ret = await dominantColors(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, e.data.numColors, e.data.deltaThreshold, e.data.bytes)
+        let ret = await dominantColors(e.data.height, e.data.width, e.data.numColors, e.data.deltaThreshold, e.data.bytes)
         retData["colors"] = ret.split(",")
     } else if (e.data.target === "pixelizeFromPalette") {
         let output = new Uint8Array(e.data.bytes.length)
         let paletteString = e.data.palette.join(",")
 
-        let ret = await pixelizeFromPalette(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, paletteString, e.data.bytes, output)
+        await pixelizeFromPalette(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, paletteString, e.data.bytes, output)
         retData["img"] = output
     } else {
         retData["success"] = false

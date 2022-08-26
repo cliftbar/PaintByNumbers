@@ -43,7 +43,7 @@ func pixelizor(this js.Value, i []js.Value) interface{} {
 	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
 	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
 
-	colorPalette := pbn.DominantColors(resizedImgRgb, clusterCount, deltaThreshold, false)
+	colorPalette := pbn.DominantColors(imgRgb, clusterCount, deltaThreshold, false)
 	fmt.Printf("color palette found %f\n", time.Since(start).Seconds())
 
 	snapImg := pbn.SnapColors(resizedImgRgb, colorPalette)
@@ -83,11 +83,9 @@ func dominantColors(this js.Value, i []js.Value) interface{} {
 
 	height := i[0].Int()
 	width := i[1].Int()
-	widthXScalar := i[2].Int()
-	heightYScalar := i[3].Int()
-	clusterCount := i[4].Int()
-	deltaThreshold := i[5].Float()
-	srcArrayJS := i[6]
+	clusterCount := i[2].Int()
+	deltaThreshold := i[3].Float()
+	srcArrayJS := i[4]
 
 	srcLen := srcArrayJS.Get("byteLength").Int()
 	inputImageBytes := make([]uint8, srcLen)
@@ -101,10 +99,7 @@ func dominantColors(this js.Value, i []js.Value) interface{} {
 	}
 	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
 
-	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
-	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
-
-	colorPalette := pbn.DominantColors(resizedImgRgb, clusterCount, deltaThreshold, false)
+	colorPalette := pbn.DominantColors(imgRgb, clusterCount, deltaThreshold, false)
 	fmt.Printf("color palette found, %d clusters, %f threshold %f\n", clusterCount, deltaThreshold, time.Since(start).Seconds())
 
 	colorPaletteHex := make([]string, 0)
