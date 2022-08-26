@@ -11,7 +11,7 @@
 <body>
     <div id="controls">
         <h1>Pixelizor</h1>
-        <p>If it's stuck spinning, the input file is probably too big, and it may or may not finish processing.  ~1000x1000 px: seconds, ~4000x4000 px: minutes.  Currently supports jpg, png, and webp formats.</p>
+        <p>If it's stuck spinning, the input file is probably too big, and it may or may not finish processing, ~4000x4000 px may take up to a minute.  Currently supports jpg, png, and webp formats.</p>
         <form onchange="readURL(event);">
             <label for="img">Select image:</label>
             <input type="file" id="img" name="img" accept="image/*">
@@ -38,7 +38,7 @@
         </div>
     </div>
     <div>
-        <p>Detected colors appear here.  Use "Generate Colors" to only create a color palette.  Colors are auto-detected using kmeans, so results will vary with repeated calculations.  CLick "Apply Colors" to run or rerun the pixelization progress.  Autodetected colors can be manually changed, useful if a small area of accent color isn't detected.</p>
+        <p>Detected colors appear here.  Use "Generate Colors" to only create a color palette.  Colors are auto-detected using kmeans, so results will vary with repeated calculations.  Click "Apply Colors" to run or rerun the pixelization progress.  Autodetected colors can be manually changed, useful if a small area of accent color isn't detected.</p>
         <div id="div_color_palette"></div>
     </div>
 
