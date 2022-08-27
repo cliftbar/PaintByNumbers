@@ -6,3 +6,11 @@ img.after {
     /*float: right;*/
     max-width: 50%;
 }
+
+form.frm_btns_run {
+    display: inline-block;
+}
+fieldset.fldst_btns_run {
+    float: left;
+    display: inline;
+}

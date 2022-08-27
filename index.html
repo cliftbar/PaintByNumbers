@@ -13,32 +13,45 @@
         <h1>Pixelizor</h1>
         <p>If it's stuck spinning, the input file is probably too big, and it may or may not finish processing, ~4000x4000 px may take up to a minute.  Currently supports jpg, png, and webp formats.</p>
         <form onchange="readURL(event);">
-            <label for="img">Select image:</label>
-            <input type="file" id="img" name="img" accept="image/*">
+            <fieldset>
+                <legend>Upload</legend>
+                <label for="img">Select image:</label>
+                <input type="file" id="img" name="img" accept="image/*">
+            </fieldset>
         </form>
         <form>
-            <label for="inpt_height_factor">Height Reduction Factor (height / x):</label>
-            <input type="number" min="1" value="10" step="1" id="inpt_height_factor">
+            <fieldset>
+                <legend>Basic Settings</legend>
+                <label for="inpt_height_factor">Height Reduction Factor (height / x):</label>
+                <input type="number" min="1" value="10" step="1" id="inpt_height_factor">
 
-            <label for="inpt_width_factor">Width Reduction Factor (width / y):</label>
-            <input type="number" min="1" value="10" step="1" id="inpt_width_factor">
+                <label for="inpt_width_factor">Width Reduction Factor (width / y):</label>
+                <input type="number" min="1" value="10" step="1" id="inpt_width_factor">
 
-            <label for="inpt_num_colors">Number of colors:</label>
-            <input type="number" min="0" value="5" step="1" id="inpt_num_colors">
+                <label for="inpt_num_colors">Number of colors:</label>
+                <input type="number" min="0" value="5" step="1" id="inpt_num_colors">
+            </fieldset>
 
-            <label for="inpt_kmeans_mode">Quick: Checked, Full: Unchecked:</label>
-            <input type="checkbox" checked id="inpt_kmeans_mode">
+            <fieldset>
+                <legend>KMeans Tuning</legend>
+                <label for="inpt_kmeans_mode">Quick: Checked, Full: Unchecked:</label>
+                <input type="checkbox" checked id="inpt_kmeans_mode">
 
-            <label for="inpt_kmeans_tune">kMeans Tuning (suggest 0.01-0.05 quick, 10 full):</label>
-            <input type="number" min="0" value="0.01" id="inpt_kmeans_tune">
+                <label for="inpt_kmeans_tune">kMeans Tuning (suggest 0.01-0.05 quick, 10 full):</label>
+                <input type="number" min="0" value="0.01" id="inpt_kmeans_tune">
+            </fieldset>
         </form>
-        <div>
-            <button onclick="workerPixelizor()">Run Pixelizor</button>
-        </div>
-        <div>
-            <button onclick="workerDominantColors()">Generate Colors</button>
-            <button onclick="workerPixelizeFromPalette()">Apply Colors</button>
-        </div>
+        <form action="javascript:void(0);" class="frm_btns_run">
+            <fieldset class="fldst_btns_run">
+                <legend>Run</legend>
+                <button onclick="workerPixelizor()">Run Pixelizor</button>
+            </fieldset>
+            <fieldset class="fldst_btns_run">
+                <legend>Run Steps Separately</legend>
+                <button onclick="workerDominantColors()">Generate Colors</button>
+                <button onclick="workerPixelizeFromPalette()">Apply Colors</button>
+            </fieldset>
+        </form>
     </div>
     <div>
         <p>Detected colors appear here.  Use "Generate Colors" to only create a color palette.  Colors are auto-detected using kmeans, so results will vary with repeated calculations.  Click "Apply Colors" to run or rerun the pixelization progress.  Autodetected colors can be manually changed, useful if a small area of accent color isn't detected.</p>
