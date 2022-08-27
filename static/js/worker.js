@@ -30,26 +30,31 @@ addEventListener('message', async (e) => {
     let retData = {
         "target": e.data.target
     }
-    if (e.data.target === "pixelizor") {
-        // Run method
-        let output = new Uint8Array(e.data.bytes.length)
+    try {
+        if (e.data.target === "pixelizor") {
+            // Run method
+            let output = new Uint8Array(e.data.bytes.length)
 
-        let ret = await pixelizor(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, e.data.numColors, 0.01, e.data.bytes, output)
+            let ret = await pixelizor(e.data.width, e.data.height, e.data.widthFactor, e.data.heightFactor, e.data.numColors, e.data.quickMeans, e.data.kMeansTune, e.data.bytes, output);
 
-        retData["img"] = output
-        retData["colors"] = ret.split(",")
-    } else if (e.data.target === "dominantColors") {
-        let ret = await dominantColors(e.data.height, e.data.width, e.data.numColors, e.data.deltaThreshold, e.data.bytes)
-        retData["colors"] = ret.split(",")
-    } else if (e.data.target === "pixelizeFromPalette") {
-        let output = new Uint8Array(e.data.bytes.length)
-        let paletteString = e.data.palette.join(",")
+            retData["img"] = output
+            retData["colors"] = ret.split(",")
+        } else if (e.data.target === "dominantColors") {
+            let ret = await dominantColors(e.data.width, e.data.height, e.data.widthFactor, e.data.heightFactor, e.data.numColors, e.data.quickMeans, e.data.kMeansTune, e.data.bytes);
+            retData["colors"] = ret.split(",")
+        } else if (e.data.target === "pixelizeFromPalette") {
+            let output = new Uint8Array(e.data.bytes.length)
+            let paletteString = e.data.palette.join(",")
 
-        await pixelizeFromPalette(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, paletteString, e.data.bytes, output)
-        retData["img"] = output
-    } else {
+            await pixelizeFromPalette(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, paletteString, e.data.bytes, output)
+            retData["img"] = output
+        } else {
+            retData["success"] = false
+            retData["reason"] = "unknown wasm method"
+        }
+    } catch (e) {
         retData["success"] = false
-        retData["reason"] = "unknown wasm method"
+        retData["reason"] = e
     }
     console.log = oldLog;
 

@@ -3,6 +3,7 @@ module paintByNumbers
 go 1.19
 
 require (
+	github.com/cdipaolo/goml v0.0.0-20220715001353-00e0c845ae1c
 	github.com/go-echarts/go-echarts/v2 v2.2.4
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/muesli/clusters v0.0.0-20200529215643-2700303c1762

@@ -18,15 +18,15 @@ import (
 func pixelizor(this js.Value, i []js.Value) interface{} {
 	start := time.Now()
 
-	height := i[0].Int()
-	width := i[1].Int()
+	width := i[0].Int()
+	height := i[1].Int()
 	widthXScalar := i[2].Int()
 	heightYScalar := i[3].Int()
 	clusterCount := i[4].Int()
-	deltaThreshold := i[5].Float()
-	srcArrayJS := i[6]
-
-	outputBuffer := i[7]
+	quickMeans := i[5].Bool()
+	kMeansTune := i[6].Float()
+	srcArrayJS := i[7]
+	outputBuffer := i[8]
 
 	srcLen := srcArrayJS.Get("byteLength").Int()
 	inputImageBytes := make([]uint8, srcLen)
@@ -43,8 +43,15 @@ func pixelizor(this js.Value, i []js.Value) interface{} {
 	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
 	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
 
-	colorPalette := pbn.DominantColors(imgRgb, clusterCount, deltaThreshold, false)
-	fmt.Printf("color palette found %f\n", time.Since(start).Seconds())
+	var colorPalette []clf.Color
+	if quickMeans {
+		fmt.Println("Running quick kmeans")
+		colorPalette = pbn.DominantColors(resizedImgRgb, clusterCount, kMeansTune, false)
+	} else {
+		fmt.Println("Running full kmeans")
+		colorPalette = pbn.DominantColorsAlt(imgRgb, clusterCount, int(kMeansTune))
+	}
+	fmt.Printf("color palette found, %d clusters, %f threshold %f\n", clusterCount, kMeansTune, time.Since(start).Seconds())
 
 	snapImg := pbn.SnapColors(resizedImgRgb, colorPalette)
 	fmt.Printf("snap done %f\n", time.Since(start).Seconds())
@@ -81,11 +88,14 @@ func pixelizor(this js.Value, i []js.Value) interface{} {
 func dominantColors(this js.Value, i []js.Value) interface{} {
 	start := time.Now()
 
-	height := i[0].Int()
-	width := i[1].Int()
-	clusterCount := i[2].Int()
-	deltaThreshold := i[3].Float()
-	srcArrayJS := i[4]
+	width := i[0].Int()
+	height := i[1].Int()
+	widthXScalar := i[2].Int()
+	heightYScalar := i[3].Int()
+	clusterCount := i[4].Int()
+	quickMeans := i[5].Bool()
+	kMeansTune := i[6].Float()
+	srcArrayJS := i[7]
 
 	srcLen := srcArrayJS.Get("byteLength").Int()
 	inputImageBytes := make([]uint8, srcLen)
@@ -99,8 +109,18 @@ func dominantColors(this js.Value, i []js.Value) interface{} {
 	}
 	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
 
-	colorPalette := pbn.DominantColors(imgRgb, clusterCount, deltaThreshold, false)
-	fmt.Printf("color palette found, %d clusters, %f threshold %f\n", clusterCount, deltaThreshold, time.Since(start).Seconds())
+	var colorPalette []clf.Color
+	if quickMeans {
+		resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
+		fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
+
+		fmt.Println("Running quick kmeans")
+		colorPalette = pbn.DominantColors(resizedImgRgb, clusterCount, kMeansTune, false)
+	} else {
+		fmt.Println("Running full kmeans")
+		colorPalette = pbn.DominantColorsAlt(imgRgb, clusterCount, int(kMeansTune))
+	}
+	fmt.Printf("color palette found, %d clusters, %f threshold %f\n", clusterCount, kMeansTune, time.Since(start).Seconds())
 
 	colorPaletteHex := make([]string, 0)
 	colorPaletteHexStr := ""

@@ -50,6 +50,8 @@ function workerPixelizor() {
     let heightFactor = parseInt(document.getElementById("inpt_height_factor").value);
     let widthFactor = parseInt(document.getElementById("inpt_width_factor").value);
     let numColors = parseInt(document.getElementById("inpt_num_colors").value);
+    let kMeansTune = parseFloat(document.getElementById("inpt_kmeans_tune").value);
+    let quickMeans = document.getElementById("inpt_kmeans_mode").checked;
 
     let img = new Image();
     img.src = document.getElementById("img_uploaded").src
@@ -64,7 +66,9 @@ function workerPixelizor() {
         "width": img.width,
         "heightFactor": heightFactor,
         "widthFactor": widthFactor,
-        "numColors": numColors
+        "numColors": numColors,
+        "kMeansTune": kMeansTune,
+        "quickMeans": quickMeans
     }
     useWorker(worker, params, (data) => {
         console.log(data)
@@ -77,6 +81,10 @@ function workerPixelizor() {
         setColorPalette(retData.colors);
 
         console.log("pixelizor post worker done")
+    }).catch((err) => {
+        console.log("error, terminating worker: " + err)
+        document.getElementById("img_altered").src = "#"
+        terminateWorker(worker);
     });
     console.log("worker created")
 }
@@ -88,7 +96,8 @@ function workerDominantColors() {
     let heightFactor = parseInt(document.getElementById("inpt_height_factor").value);
     let widthFactor = parseInt(document.getElementById("inpt_width_factor").value);
     let numColors = parseInt(document.getElementById("inpt_num_colors").value);
-    let deltaThreshold = parseInt(document.getElementById("inpt_delta_threshold").value);
+    let kMeansTune = parseFloat(document.getElementById("inpt_kmeans_tune").value);
+    let quickMeans = document.getElementById("inpt_kmeans_mode").checked;
 
     let img = new Image();
     img.src = document.getElementById("img_uploaded").src
@@ -105,7 +114,8 @@ function workerDominantColors() {
         "heightFactor": heightFactor,
         "widthFactor": widthFactor,
         "numColors": numColors,
-        "deltaThreshold": deltaThreshold
+        "kMeansTune": kMeansTune,
+        "quickMeans": quickMeans
     }
     useWorker(worker, params, (data) => {
         console.log(data)
@@ -113,6 +123,10 @@ function workerDominantColors() {
         setColorPalette(retData.colors);
 
         console.log("dominantColors post worker done")
+    }).catch((err) => {
+        console.log("error, terminating worker: " + err)
+        document.getElementById("img_altered").src = "#"
+        terminateWorker(worker);
     });
     console.log("worker created")
 }

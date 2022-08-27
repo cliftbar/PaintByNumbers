@@ -26,8 +26,11 @@
             <label for="inpt_num_colors">Number of colors:</label>
             <input type="number" min="0" value="5" step="1" id="inpt_num_colors">
 
-            <label for="inpt_delta_threshold">Delta Threshold (kmeans tuning, dunno what it does):</label>
-            <input type="number" min="0" value="0.01" id="inpt_delta_threshold">
+            <label for="inpt_kmeans_mode">Quick: Checked, Full: Unchecked:</label>
+            <input type="checkbox" checked id="inpt_kmeans_mode">
+
+            <label for="inpt_kmeans_tune">kMeans Tuning (suggest 0.01-0.05 quick, 10 full):</label>
+            <input type="number" min="0" value="0.01" id="inpt_kmeans_tune">
         </form>
         <div>
             <button onclick="workerPixelizor()">Run Pixelizor</button>

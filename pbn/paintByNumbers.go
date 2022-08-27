@@ -1,6 +1,8 @@
 package pbn
 
 import (
+	"fmt"
+	gcl "github.com/cdipaolo/goml/cluster"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	clf "github.com/lucasb-eyer/go-colorful"
@@ -11,10 +13,8 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"math"
-	"math/rand"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 func LoadImage(imgPath string) image.Image {
@@ -66,8 +66,8 @@ func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, d
 		}
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(obs), func(i, j int) { obs[i], obs[j] = obs[j], obs[i] })
+	//rand.Seed(time.Now().UnixNano())
+	//rand.Shuffle(len(obs), func(i, j int) { obs[i], obs[j] = obs[j], obs[i] })
 
 	kmm, _ := km.NewWithOptions(deltaThreshold, nil)
 	centroidColors, err := kmm.Partition(obs, clusterCount)
@@ -104,6 +104,39 @@ func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, d
 			R: centroid.Center[0] / 255.0,
 			G: centroid.Center[1] / 255.0,
 			B: centroid.Center[2] / 255.0,
+		})
+	}
+
+	return colorPalette
+}
+
+// DominantColorsAlt cluster default: 5, deltaThreshold .01
+func DominantColorsAlt(img image.Image, clusterCount int, iterations int) []clf.Color {
+	var obs [][]float64
+
+	for x := 0; x < img.Bounds().Size().X; x++ {
+		for y := 0; y < img.Bounds().Size().Y; y++ {
+			r, g, b, _ := img.At(x, y).RGBA()
+			obs = append(obs, []float64{
+				float64(r) / 255.0, float64(g) / 255.0, float64(b) / 255.0,
+			})
+		}
+	}
+
+	model := gcl.NewKMeans(clusterCount, iterations, obs)
+	if model.Learn() != nil {
+		panic("kmeans error")
+	}
+
+	fmt.Println(model.Centroids)
+
+	colorPalette := make([]clf.Color, 0)
+
+	for _, centroid := range model.Centroids {
+		colorPalette = append(colorPalette, clf.Color{
+			R: centroid[0] / 255.0,
+			G: centroid[1] / 255.0,
+			B: centroid[2] / 255.0,
 		})
 	}
 
