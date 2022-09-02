@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/disintegration/imaging"
 	clf "github.com/lucasb-eyer/go-colorful"
 	"github.com/nfnt/resize"
 	_ "golang.org/x/image/webp"
@@ -32,13 +33,15 @@ func pixelizor(this js.Value, i []js.Value) interface{} {
 	inputImageBytes := make([]uint8, srcLen)
 	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
 	fmt.Printf("src bytes copied %f\n", time.Since(start).Seconds())
+	fmt.Printf("Input Height: %d, width: %d, pixels: %d\n", height, width, len(inputImageBytes))
 
-	imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	//imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	imgRgb, err := imaging.Decode(bytes.NewReader(inputImageBytes), imaging.AutoOrientation(true))
 	fmt.Printf("decode image done %f\n", time.Since(start).Seconds())
 	if err != nil {
 		panic("unable to read image")
 	}
-	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
+	fmt.Printf("Decode Height: %d, width: %d, pixels: %d\n", imgRgb.Bounds().Size().Y, imgRgb.Bounds().Size().X, imgRgb.Bounds().Size().X*imgRgb.Bounds().Size().Y)
 
 	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
 	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
@@ -57,7 +60,7 @@ func pixelizor(this js.Value, i []js.Value) interface{} {
 	fmt.Printf("snap done %f\n", time.Since(start).Seconds())
 
 	newImage := resize.Resize(uint(imgRgb.Bounds().Size().X), uint(imgRgb.Bounds().Size().Y), snapImg, resize.NearestNeighbor)
-	fmt.Printf("resize up done %f\n", time.Since(start).Seconds())
+	fmt.Printf("resize up done %f, widthX: %d, heightY: %d\n", time.Since(start).Seconds())
 
 	var imgBuf *bytes.Buffer
 	var bufBytes []uint8

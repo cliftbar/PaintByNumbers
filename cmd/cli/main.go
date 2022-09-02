@@ -13,7 +13,7 @@ import (
 
 func main() {
 	wd, err := os.Getwd()
-	imgRgb := pbn.LoadImage(filepath.Join(wd, "/test_images/pokemon_mindjourney.png"))
+	imgRgb := pbn.LoadImage(filepath.Join(wd, "/test_images/zaku.jpg"))
 
 	//resizedImgRgb := image.NewRGBA(image.Rect(0, 0, imgRgb.Bounds().Size().X/10, imgRgb.Bounds().Size().Y/10))
 	//err = rez.Convert(resizedImgRgb, imgRgb, rez.NewBilinearFilter())

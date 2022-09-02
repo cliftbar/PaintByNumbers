@@ -3,6 +3,7 @@ package pbn
 import (
 	"fmt"
 	gcl "github.com/cdipaolo/goml/cluster"
+	"github.com/disintegration/imaging"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	clf "github.com/lucasb-eyer/go-colorful"
@@ -18,14 +19,14 @@ import (
 )
 
 func LoadImage(imgPath string) image.Image {
-	existingImageFile, err := os.Open(filepath.Clean(imgPath))
-	if err != nil {
-		panic(err)
-	}
-	defer existingImageFile.Close()
+	//existingImageFile, err := os.Open(filepath.Clean(imgPath))
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer existingImageFile.Close()
 
-	imageData, _, err := image.Decode(existingImageFile)
-
+	//imageData, _, err := image.Decode(existingImageFile)
+	imageData, err := imaging.Open(filepath.Clean(imgPath), imaging.AutoOrientation(true))
 	if err != nil {
 		panic(err)
 	}
