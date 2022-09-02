@@ -2,4 +2,4 @@
 tinygo build -target=wasm -no-debug -gc=leaking -o .\static\wasm\tinypbn.wasm main.go
 
 # Caddy Server
-.\caddy.exe file-server --access-log --listen 0.0.0.0:8080 *>> pixelizor.log
+.\caddy.exe file-server --access-log --root web --listen 0.0.0.0:8080 *>> pixelizor.log
