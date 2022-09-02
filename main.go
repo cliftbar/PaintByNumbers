@@ -7,7 +7,6 @@ import (
 	clf "github.com/lucasb-eyer/go-colorful"
 	"github.com/nfnt/resize"
 	_ "golang.org/x/image/webp"
-	"image"
 	_ "image/jpeg"
 	"image/png"
 	"paintByNumbers/pbn"
@@ -105,12 +104,13 @@ func dominantColors(this js.Value, i []js.Value) interface{} {
 	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
 	fmt.Printf("src bytes copied %f\n", time.Since(start).Seconds())
 
-	imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	//imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	imgRgb, err := imaging.Decode(bytes.NewReader(inputImageBytes), imaging.AutoOrientation(true))
 	fmt.Printf("decode image done %f\n", time.Since(start).Seconds())
 	if err != nil {
 		panic("unable to read image")
 	}
-	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
+	fmt.Printf("Height: %d, width: %d, pixels: %d\n", height, width, len(inputImageBytes))
 
 	var colorPalette []clf.Color
 	if quickMeans {
@@ -165,12 +165,13 @@ func pixelizeFromPalette(this js.Value, i []js.Value) interface{} {
 	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
 	fmt.Printf("src bytes copied %f\n", time.Since(start).Seconds())
 
-	imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	//imgRgb, inputType, err := image.Decode(bytes.NewReader(inputImageBytes))
+	imgRgb, err := imaging.Decode(bytes.NewReader(inputImageBytes), imaging.AutoOrientation(true))
 	fmt.Printf("decode image done %f\n", time.Since(start).Seconds())
 	if err != nil {
 		panic("unable to read image")
 	}
-	fmt.Printf("Height: %d, width: %d, pixels: %d, type: %s\n", height, width, len(inputImageBytes), inputType)
+	fmt.Printf("Height: %d, width: %d, pixels: %d\n", height, width, len(inputImageBytes))
 
 	resizedImgRgb := resize.Resize(uint(imgRgb.Bounds().Size().X/widthXScalar), uint(imgRgb.Bounds().Size().Y/heightYScalar), imgRgb, resize.NearestNeighbor)
 	fmt.Printf("image resize down %f\n", time.Since(start).Seconds())
