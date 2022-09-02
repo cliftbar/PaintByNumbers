@@ -1,1 +1,0 @@
-tinygo build -target=wasm -no-debug -gc=leaking -o .\static\wasm\tinypbn.wasm main.go
