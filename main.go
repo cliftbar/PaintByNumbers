@@ -61,12 +61,9 @@ func pixelizor(this js.Value, i []js.Value) interface{} {
 	newImage := resize.Resize(uint(imgRgb.Bounds().Size().X), uint(imgRgb.Bounds().Size().Y), snapImg, resize.NearestNeighbor)
 	fmt.Printf("resize up done %f, widthX: %d, heightY: %d\n", time.Since(start).Seconds())
 
-	var imgBuf *bytes.Buffer
-	var bufBytes []uint8
-
-	imgBuf = new(bytes.Buffer)
+	imgBuf := new(bytes.Buffer)
 	_ = png.Encode(imgBuf, newImage)
-	bufBytes = imgBuf.Bytes()
+	bufBytes := imgBuf.Bytes()
 
 	js.CopyBytesToJS(outputBuffer, bufBytes)
 	fmt.Printf("outputBuffer bytes copied %f\n", time.Since(start).Seconds())
