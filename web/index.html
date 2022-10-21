@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Pixelizor</title>
-    <!--    <script src="/static/js/wasm_exec.js"></script>-->
     <link rel="stylesheet" href="/static/css/pbn.css">
     <script src="/static/js/pbn.js"></script>
+    <script src="/static/js/utils.js"></script>
 </head>
 
 <body>
+    <div id="links">
+        <a href="./stereogram.html">Stereodots</a>
+    </div>
+    <h1>Pixelizor</h1>
+    <p>If it's stuck spinning, the input file is probably too big, and it may or may not finish processing, ~4000x4000 px may take up to a minute.  Currently supports jpg, png, and webp formats.</p>
     <div id="controls">
-        <h1>Pixelizor</h1>
-        <p>If it's stuck spinning, the input file is probably too big, and it may or may not finish processing, ~4000x4000 px may take up to a minute.  Currently supports jpg, png, and webp formats.</p>
-        <form onchange="readURL(event);">
+        <form onchange="readURL(event, 'img_uploaded');">
             <fieldset>
                 <legend>Upload</legend>
                 <label for="img">Select image:</label>

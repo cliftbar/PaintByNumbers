@@ -193,10 +193,64 @@ func pixelizeFromPalette(this js.Value, i []js.Value) interface{} {
 	return js.ValueOf("done")
 }
 
+func stereogram(this js.Value, i []js.Value) interface{} {
+	start := time.Now()
+
+	heightYFactor := i[0].Int()
+	widthXFactor := i[1].Int()
+	patternWidthXFactor := i[2].Int()
+	shiftAmplitude := i[3].Float()
+	invert := i[4].Bool()
+	srcArrayJS := i[5]
+	outputBuffer := i[6]
+	fmt.Printf("Args %s\n", i[:5])
+
+	srcLen := srcArrayJS.Get("byteLength").Int()
+	inputImageBytes := make([]uint8, srcLen)
+	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
+
+	//baseImg := pbn.LoadImage("circle.png")
+	//depthMapImgOrig := pbn.LoadImage("test_images/buns_dm.png")
+	//baseImgColorOrig := pbn.LoadImage("test_images/buns.png")
+	//depthMapImgOrig := pbn.LoadImage("color_bottle.png")
+	depthMapImgOrig, err := imaging.Decode(bytes.NewReader(inputImageBytes), imaging.AutoOrientation(true))
+	if err != nil {
+		panic("unable to read image")
+	}
+
+	factoredWidthX := uint(depthMapImgOrig.Bounds().Dx() / widthXFactor)
+	factoredWidthY := uint(depthMapImgOrig.Bounds().Dy() / heightYFactor)
+	baseImg := resize.Resize(factoredWidthX, factoredWidthY, depthMapImgOrig, resize.NearestNeighbor)
+	fmt.Printf("image resize down to %dx%d at %fs\n", factoredWidthX, factoredWidthY, time.Since(start).Seconds())
+
+	//baseImg := pbn.LoadImage("test_images/gundam2.png")
+	//depthMap := pbn.SimpleDepthMap(baseImg)
+	//depthMap := pbn.GreyscaleDepthMap(baseImg)
+	depthMap := pbn.ColorDepthMap(baseImg)
+	fmt.Printf("Depth Map array created at %fs\n", time.Since(start).Seconds())
+
+	pattern := pbn.SimplePatternImage(baseImg.Bounds().Dx()/patternWidthXFactor, baseImg.Bounds().Dy())
+	//pattern := pbn.PalettePatternImage(baseImg.Bounds().Dx()/10, baseImg.Bounds().Dy(), baseImgColorOrig)
+	//pbn.SaveImage("pattern.png", pattern)
+	fmt.Printf("Pattern created at %s %fs\n", pattern.Bounds(), time.Since(start).Seconds())
+
+	stereogramImg := pbn.GenerateStereogram(depthMap, baseImg.Bounds().Dx(), baseImg.Bounds().Dy(), pattern, shiftAmplitude, invert)
+	fmt.Printf("Stereogram created, size %s, at %fs\n", stereogramImg.Bounds(), time.Since(start).Seconds())
+
+	imgBuf := new(bytes.Buffer)
+	_ = png.Encode(imgBuf, stereogramImg)
+	bufBytes := imgBuf.Bytes()
+
+	js.CopyBytesToJS(outputBuffer, bufBytes)
+	fmt.Printf("image (%d bytes) copied to outputBuffer %f\n", len(bufBytes), time.Since(start).Seconds())
+
+	return js.ValueOf(len(imgBuf.Bytes()))
+}
 func registerCallbacks() {
 	js.Global().Set("pixelizor", js.FuncOf(pixelizor))
 	js.Global().Set("dominantColors", js.FuncOf(dominantColors))
 	js.Global().Set("pixelizeFromPalette", js.FuncOf(pixelizeFromPalette))
+	js.Global().Set("stereogram", js.FuncOf(stereogram))
 }
 
 func main() {
