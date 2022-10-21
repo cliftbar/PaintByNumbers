@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/nfnt/resize"
 	_ "image/jpeg"
@@ -11,7 +12,7 @@ import (
 	"path/filepath"
 )
 
-func main() {
+func pixelizor() {
 	wd, err := os.Getwd()
 	imgRgb := pbn.LoadImage(filepath.Join(wd, "/test_images/zaku.jpg"))
 
@@ -41,4 +42,37 @@ func main() {
 	if err != nil {
 		// Handle error
 	}
+}
+
+func stereogram() {
+	//baseImg := pbn.LoadImage("circle.png")
+	baseImgOrig := pbn.LoadImage("test_images/bottle_dm.png")
+	//baseImgColorOrig := pbn.LoadImage("test_images/buns.png")
+	//baseImgOrig := pbn.LoadImage("color_bottle.png")
+	pbn.SaveImage("test.png", baseImgOrig)
+	baseImg := resize.Resize(uint(baseImgOrig.Bounds().Dx()/1), uint(baseImgOrig.Bounds().Dy()/1), baseImgOrig, resize.NearestNeighbor)
+	pbn.SaveImage("test_resize.png", baseImg)
+
+	//baseImg := pbn.LoadImage("test_images/gundam2.png")
+	//depthMap := pbn.SimpleDepthMap(baseImg)
+	//depthMap := pbn.GreyscaleDepthMap(baseImg)
+	depthMap := pbn.ColorDepthMap(baseImg)
+	pbn.SaveImage("depthMap.png", baseImg)
+
+	pattern := pbn.SimplePatternImage(baseImg.Bounds().Dx()/10, baseImg.Bounds().Dy())
+	//pattern := pbn.PalettePatternImage(baseImg.Bounds().Dx()/10, baseImg.Bounds().Dy(), baseImgColorOrig)
+	pbn.SaveImage("pattern.png", pattern)
+
+	stereogramImg := pbn.GenerateStereogram(depthMap, baseImg.Bounds().Dx(), baseImg.Bounds().Dy(), pattern, 0.4, false)
+	pbn.SaveImage("stereogram.png", stereogramImg)
+
+	imgBuf := new(bytes.Buffer)
+	_ = png.Encode(imgBuf, stereogramImg)
+	bufBytes := imgBuf.Bytes()
+	fmt.Printf("%d", len(bufBytes))
+
+}
+
+func main() {
+	stereogram()
 }

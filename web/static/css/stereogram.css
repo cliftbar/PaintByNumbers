@@ -1,0 +1,27 @@
+img.before {
+    float: left;
+    max-width: 33%;
+}
+img.middle {
+    /*float: right;*/
+    max-width: 33%;
+}
+img.after {
+    /*float: right;*/
+    max-width: 33%;
+}
+
+form.frm_btns_run {
+    display: inline-block;
+}
+fieldset.fldst_btns_run {
+    float: left;
+    display: inline;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}

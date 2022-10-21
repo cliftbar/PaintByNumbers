@@ -20,9 +20,11 @@ addEventListener('message', async (e) => {
     // hijack the console.log function to capture stdout
     // send each line of output to the main thread
     let oldLog = console.log;
-    console.log = (line) => { postMessage({
-        message: line
-    }); };
+    console.log = (line) => {
+        postMessage({
+            message: line
+        });
+    };
 
     // Start wasm process
     console.log("wasm start")
@@ -47,7 +49,14 @@ addEventListener('message', async (e) => {
             let paletteString = e.data.palette.join(",")
 
             await pixelizeFromPalette(e.data.height, e.data.width, e.data.heightFactor, e.data.widthFactor, paletteString, e.data.bytes, output)
-            retData["img"] = output
+            retData["img"] = output;
+        } else if (e.data.target === "stereogram") {
+            // this is getting set too smaaaallll
+            let output = new Uint8Array(e.data.bytes.length)
+
+            await stereogram(e.data.heightYFactor, e.data.widthXFactor, e.data.patternWidthXFactor, e.data.shiftAmplitude, e.data.invert, e.data.bytes, output)
+            console.log("output buffer length: " + output.length + " bytes")
+            retData["img"] = output;
         } else {
             retData["success"] = false
             retData["reason"] = "unknown wasm method"

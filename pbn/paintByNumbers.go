@@ -3,7 +3,6 @@ package pbn
 import (
 	"fmt"
 	gcl "github.com/cdipaolo/goml/cluster"
-	"github.com/disintegration/imaging"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	clf "github.com/lucasb-eyer/go-colorful"
@@ -15,24 +14,7 @@ import (
 	_ "image/png"
 	"math"
 	"os"
-	"path/filepath"
 )
-
-func LoadImage(imgPath string) image.Image {
-	//existingImageFile, err := os.Open(filepath.Clean(imgPath))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//defer existingImageFile.Close()
-
-	//imageData, _, err := image.Decode(existingImageFile)
-	imageData, err := imaging.Open(filepath.Clean(imgPath), imaging.AutoOrientation(true))
-	if err != nil {
-		panic(err)
-	}
-
-	return imageData
-}
 
 func PlotColorPalette(data []opts.BarData) {
 	// create a new bar instance
@@ -111,7 +93,7 @@ func DominantColors(img image.Image, clusterCount int, deltaThreshold float64, d
 	return colorPalette
 }
 
-// DominantColorsAlt cluster default: 5, deltaThreshold .01
+// DominantColorsAlt cluster default: 5, iterations: 10
 func DominantColorsAlt(img image.Image, clusterCount int, iterations int) []clf.Color {
 	var obs [][]float64
 

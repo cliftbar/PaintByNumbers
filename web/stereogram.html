@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Pixelizor</title>
+    <link rel="stylesheet" href="/static/css/stereogram.css">
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/stereogram.js"></script>
+<!--    <script src="/static/js/pbn.js"></script>-->
+
+  </head>
+  <body>
+    <div id="links">
+      <a href="./index.html">Pixelizor</a>
+    </div>
+    <h1>Stereodots</h1>
+    <div id="controls"></div>
+    <form id="frm_upload_image" onchange="readURL(event, 'img_uploaded');">
+      <fieldset>
+        <legend>Upload</legend>
+        <label for="inpt_img">Select image:</label>
+        <input type="file" id="inpt_img" name="img" accept="image/*">
+      </fieldset>
+    </form>
+    <form action="javascript:void(0);" class="frm_btns_run_stereogram">
+      <fieldset class="fldst_btns_run_depthmap">
+        <legend>Depth Map</legend>
+
+        <label for="slct_depthmap_model">MiDaS Model:</label>
+        <select id="slct_depthmap_model">
+          <option value="midas_v21_small">midas_v21_small (faster)</option>
+          <option value="dpt_hybrid" selected>dpt_hybrid (balanced)</option>
+          <option value="dpt_large">dpt_large (more accurate)</option>
+        </select>
+
+        <button onclick="getDepthMap()">Create DepthMap</button>
+      </fieldset>
+      <fieldset class="fldst_btns_run_stereogram">
+        <legend>Create Stereogram</legend>
+
+        <label for="inpt_height_factor">Height Reduction Factor (height / x):</label>
+        <input type="number" min="1" value="5" step="1" id="inpt_height_factor">
+        <label for="inpt_width_factor">Width Reduction Factor (width / y):</label>
+        <input type="number" min="1" value="5" step="1" id="inpt_width_factor">
+        <label for="inpt_pattern_factor">Pattern Width Factor:</label>
+        <input type="number" min="1" value="10" step="1" id="inpt_pattern_factor">
+        <label for="inpt_shift_amplitude">Pixel Shift Amplitude:</label>
+        <input type="number" min="0" value="0.2" step="0.1" id="inpt_shift_amplitude">
+        <label for="inpt_invert_depthmap">Invert Depth Map:</label>
+        <input type="checkbox" id="inpt_invert_depthmap">
+
+        <button onclick="workerStereogram()">Create Stereogram</button>
+      </fieldset>
+    </form>
+    <div>
+      <img class="before" id="img_uploaded" src="#" alt="your image" />
+      <img class="middle" id="img_depthmap" src="#" alt="depthmap image" />
+      <img class="after" id="img_stereogram" src="#" alt="stereogram image" />
+    </div>
+    <div class="footer">
+      <p>Depth Map functionality provided by the <a href="https://github.com/isl-org/MiDaS">MiDaS Model</a> <button onclick="citationCopy()">Copy Citation</button></p>
+    </div>
+  </body>
+</html>
