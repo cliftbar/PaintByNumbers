@@ -8,7 +8,7 @@ function getDepthMap(){
     const imgInputField = document.getElementById("inpt_img")
     formData.append("fi", imgInputField.files[0])
 
-    let url = new URL("http://localhost:8069/depthmap")
+    let url = new URL("https://pixel.cliftbar.site/depthmap")
     url.search = new URLSearchParams({name: "fi", model_type: modelSelection}).toString()
 
     fetch(url, {
