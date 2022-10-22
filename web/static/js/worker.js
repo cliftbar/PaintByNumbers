@@ -57,6 +57,13 @@ addEventListener('message', async (e) => {
             await stereogram(e.data.heightYFactor, e.data.widthXFactor, e.data.patternWidthXFactor, e.data.shiftAmplitude, e.data.invert, e.data.bytes, output)
             console.log("output buffer length: " + output.length + " bytes")
             retData["img"] = output;
+        } else if (e.data.target === "depthMap") {
+            // this is getting set too smaaaallll
+            let output = new Uint8Array(e.data.bytes.length)
+
+            await makeDepthMap(e.data.alg, e.data.bytes, output)
+            console.log("output buffer length: " + output.length + " bytes")
+            retData["img"] = output;
         } else {
             retData["success"] = false
             retData["reason"] = "unknown wasm method"

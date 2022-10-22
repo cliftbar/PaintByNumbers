@@ -19,8 +19,12 @@ fieldset.fldst_btns_run {
     display: inline;
 }
 
+form fieldset.fieldset-options {
+    display: inline-block;
+}
+
 .footer {
-    position: fixed;
+    position: page;
     left: 0;
     bottom: 0;
     width: 100%;

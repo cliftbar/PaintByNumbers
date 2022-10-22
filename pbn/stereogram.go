@@ -51,7 +51,7 @@ func PalettePatternImage(widthX int, heightY int, src image.Image) image.Image {
 	return img
 }
 
-func SimpleDepthMap(src image.Image) [][]float64 {
+func SimpleDepthMap(src image.Image) ([][]float64, image.Image) {
 	outMap := make2DSliceFloat64(src.Bounds().Dy(), src.Bounds().Dx())
 	depthMapImg := imaging.New(src.Bounds().Dx(), src.Bounds().Dy(), color.Black)
 
@@ -75,12 +75,12 @@ func SimpleDepthMap(src image.Image) [][]float64 {
 		}
 	}
 
-	SaveImage("depthMap.png", depthMapImg)
+	//SaveImage("depthMap.png", depthMapImg)
 
-	return outMap
+	return outMap, depthMapImg
 }
 
-func ColorDepthMap(src image.Image) [][]float64 {
+func ColorDepthMap(src image.Image) ([][]float64, image.Image) {
 	outMap := make2DSliceFloat64(src.Bounds().Dy(), src.Bounds().Dx())
 	depthMapImg := imaging.New(src.Bounds().Dx(), src.Bounds().Dy(), color.Black)
 	max := 0.0
@@ -106,14 +106,11 @@ func ColorDepthMap(src image.Image) [][]float64 {
 			outMap[x][y] = outMap[x][y] / max
 		}
 	}
-	//println(max)
 
-	//SaveImage("depthMap.png", depthMapImg)
-
-	return outMap
+	return outMap, depthMapImg
 }
 
-func GreyscaleDepthMap(src image.Image) [][]float64 {
+func GreyscaleDepthMap(src image.Image) ([][]float64, image.Image) {
 	outMap := make2DSliceFloat64(src.Bounds().Dy(), src.Bounds().Dx())
 	depthMapImg := imaging.New(src.Bounds().Dx(), src.Bounds().Dy(), color.Black)
 	max := 0.0
@@ -151,11 +148,7 @@ func GreyscaleDepthMap(src image.Image) [][]float64 {
 		}
 	}
 
-	println(max)
-
-	SaveImage("depthMap.png", depthMapImg)
-
-	return outMap
+	return outMap, depthMapImg
 }
 
 // amplitude 0.1

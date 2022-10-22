@@ -7,6 +7,7 @@ import (
 	clf "github.com/lucasb-eyer/go-colorful"
 	"github.com/nfnt/resize"
 	_ "golang.org/x/image/webp"
+	"image"
 	_ "image/jpeg"
 	"image/png"
 	"paintByNumbers/pbn"
@@ -226,7 +227,7 @@ func stereogram(this js.Value, i []js.Value) interface{} {
 	//baseImg := pbn.LoadImage("test_images/gundam2.png")
 	//depthMap := pbn.SimpleDepthMap(baseImg)
 	//depthMap := pbn.GreyscaleDepthMap(baseImg)
-	depthMap := pbn.ColorDepthMap(baseImg)
+	depthMap, _ := pbn.ColorDepthMap(baseImg)
 	fmt.Printf("Depth Map array created at %fs\n", time.Since(start).Seconds())
 
 	pattern := pbn.SimplePatternImage(baseImg.Bounds().Dx()/patternWidthXFactor, baseImg.Bounds().Dy())
@@ -246,11 +247,53 @@ func stereogram(this js.Value, i []js.Value) interface{} {
 
 	return js.ValueOf(len(imgBuf.Bytes()))
 }
+
+func makeDepthMap(this js.Value, i []js.Value) interface{} {
+	start := time.Now()
+
+	depthMapAlgo := i[0].Int()
+	srcArrayJS := i[1]
+	outputBuffer := i[2]
+
+	println(depthMapAlgo)
+
+	srcLen := srcArrayJS.Get("byteLength").Int()
+	inputImageBytes := make([]uint8, srcLen)
+	js.CopyBytesToGo(inputImageBytes, srcArrayJS)
+
+	depthMapImgOrig, err := imaging.Decode(bytes.NewReader(inputImageBytes), imaging.AutoOrientation(true))
+	if err != nil {
+		panic("unable to read image")
+	}
+	fmt.Println(depthMapImgOrig.Bounds())
+
+	var depthMapImage image.Image
+	if depthMapAlgo == 1 {
+		_, depthMapImage = pbn.GreyscaleDepthMap(depthMapImgOrig)
+	} else if depthMapAlgo == 2 {
+		_, depthMapImage = pbn.ColorDepthMap(depthMapImgOrig)
+	} else {
+		_, depthMapImage = pbn.SimpleDepthMap(depthMapImgOrig)
+	}
+
+	fmt.Printf("Depth Map created at %fs\n", time.Since(start).Seconds())
+
+	imgBuf := new(bytes.Buffer)
+	_ = png.Encode(imgBuf, depthMapImage)
+	bufBytes := imgBuf.Bytes()
+
+	js.CopyBytesToJS(outputBuffer, bufBytes)
+	fmt.Printf("image (%d bytes) copied to outputBuffer %f\n", len(bufBytes), time.Since(start).Seconds())
+
+	return js.ValueOf(len(imgBuf.Bytes()))
+}
+
 func registerCallbacks() {
 	js.Global().Set("pixelizor", js.FuncOf(pixelizor))
 	js.Global().Set("dominantColors", js.FuncOf(dominantColors))
 	js.Global().Set("pixelizeFromPalette", js.FuncOf(pixelizeFromPalette))
 	js.Global().Set("stereogram", js.FuncOf(stereogram))
+	js.Global().Set("makeDepthMap", js.FuncOf(makeDepthMap))
 }
 
 func main() {

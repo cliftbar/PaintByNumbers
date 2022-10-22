@@ -1,5 +1,5 @@
 let depthMapArrayBuf = new Uint8Array([]);
-function getDepthMap(){
+function getMidasDepthMap(){
     document.getElementById("img_depthmap").src = "/static/img/loading.gif"
 
     let modelSelection = document.getElementById("slct_depthmap_model").value;
@@ -61,6 +61,41 @@ function workerStereogram() {
     }).catch((err) => {
         console.log("error, terminating worker: " + err)
         document.getElementById("img_stereogram").src = "#"
+        terminateWorker(worker);
+    });
+    console.log("worker created")
+}
+
+function workerDepthMapAlgo() {
+    document.getElementById("img_depthmap").src = "/static/img/loading.gif"
+
+    let algorithm = parseInt(document.getElementById("slct_compute_depthmap_model").value);
+
+    let img = new Image();
+    img.src = document.getElementById("img_uploaded").src
+    let worker = getWorker()
+
+    // keep reference so that we don't garbage collect the worker I guess?
+    window.worker = worker.webWorker
+    let params = {
+        "target": "depthMap",
+        "bytes": fileByteArrayBuf,
+        "alg": algorithm
+    }
+    useWorker(worker, params, (data) => {
+        console.log(data)
+    }).then((retData) => {
+        // Set depthmap img and buffer
+        let blb = new Blob([retData.img.buffer]);
+        document.getElementById("img_depthmap").src = URL.createObjectURL(blb, { type: "image/png" });
+        blb.arrayBuffer().then(buf => {
+            depthMapArrayBuf = new Uint8Array(buf);
+        })
+
+        console.log("depthmap post worker done")
+    }).catch((err) => {
+        console.log("error, terminating worker: " + err)
+        document.getElementById("img_depthmap").src = "#"
         terminateWorker(worker);
     });
     console.log("worker created")

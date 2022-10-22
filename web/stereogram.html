@@ -14,6 +14,7 @@
       <a href="./index.html">Pixelizor</a>
     </div>
     <h1>Stereodots</h1>
+    <p>Still a work in progress</p>
     <div id="controls"></div>
     <form id="frm_upload_image" onchange="readURL(event, 'img_uploaded');">
       <fieldset>
@@ -22,9 +23,18 @@
         <input type="file" id="inpt_img" name="img" accept="image/*">
       </fieldset>
     </form>
-    <form action="javascript:void(0);" class="frm_btns_run_stereogram">
-      <fieldset class="fldst_btns_run_depthmap">
-        <legend>Depth Map</legend>
+    <form action="javascript:void(0);" id="frm_btns_run_stereogram">
+      <fieldset class="fieldset-options">
+        <legend>Compute Depth Map</legend>
+        <select id="slct_compute_depthmap_model">
+          <option value="0">simple</option>
+          <option value="1" selected>greyscale</option>
+          <option value="2">color</option>
+        </select>
+        <button onclick="workerDepthMapAlgo()">Create DepthMap</button>
+      </fieldset>
+      <fieldset id="fldst_btns_run_depthmap" class="fieldset-options">
+        <legend>MiDaS Depth Map</legend>
 
         <label for="slct_depthmap_model">MiDaS Model:</label>
         <select id="slct_depthmap_model">
@@ -33,9 +43,11 @@
           <option value="dpt_large">dpt_large (more accurate)</option>
         </select>
 
-        <button onclick="getDepthMap()">Create DepthMap</button>
+        <button onclick="getMidasDepthMap()">Create MiDaS DepthMap</button>
+
+        <p>Depth Map functionality provided by the <a href="https://github.com/isl-org/MiDaS">MiDaS Model</a> <button onclick="citationCopy()">Copy Citation</button></p>
       </fieldset>
-      <fieldset class="fldst_btns_run_stereogram">
+      <fieldset id="fldst_btns_run_stereogram">
         <legend>Create Stereogram</legend>
 
         <label for="inpt_height_factor">Height Reduction Factor (height / x):</label>
@@ -56,9 +68,6 @@
       <img class="before" id="img_uploaded" src="#" alt="your image" />
       <img class="middle" id="img_depthmap" src="#" alt="depthmap image" />
       <img class="after" id="img_stereogram" src="#" alt="stereogram image" />
-    </div>
-    <div class="footer">
-      <p>Depth Map functionality provided by the <a href="https://github.com/isl-org/MiDaS">MiDaS Model</a> <button onclick="citationCopy()">Copy Citation</button></p>
     </div>
   </body>
 </html>
