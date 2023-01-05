@@ -6,9 +6,10 @@
     <link rel="stylesheet" href="/static/css/pbn.css">
     <script src="/static/js/pbn.js"></script>
     <script src="/static/js/utils.js"></script>
+    <script src="/static/js/comments.js"></script>
 </head>
 
-<body>
+<body onload="getComments()">
     <div id="links">
         <a href="./stereogram.html">Stereodots</a>
     </div>
@@ -65,7 +66,17 @@
         <img class="before" id="img_uploaded" src="#" alt="your image" />
         <img class="after" id="img_altered" src="#" alt="pixelized image" />
     </div>
-
-
+    <br />
+    <h1>Comments</h1>
+    <form action="javascript:void(0);">
+        <label for="inpt_author">Name (Optional)</label>
+        <input type="text" id="inpt_author"/>
+        <label for="inpt_message">Add Comment</label>
+        <input type="text" id="inpt_message" minlength="1"/>
+        <button onclick="postComment(event)">Send</button>
+    </form>
+    <div id="dv_comments" style="display: flex; height: 100%; flex-direction: column">
+        <ul id="ul_messages" style="flex-grow: 1; list-style-type: none"></ul>
+    </div>
 </body>
 </html>
