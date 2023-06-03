@@ -29,7 +29,6 @@ function quaggaInit(restart = true) {
 function quaggaFromFileInit(restart = true) {
     let fileUpload = document.getElementById("inpt_fileUpload")
     let readerDecodeType = document.getElementById("slct_decoderReaderType").value + "_reader"
-    let viewportDiv = document.getElementById("div_interactive")
 
     if (!fileUpload.files || !fileUpload.files.length) {
         alert("Must Upload a File!")
@@ -52,24 +51,6 @@ function quaggaFromFileInit(restart = true) {
         }
     }
 
-    // Quagga.init({
-    //     inputStream: {
-    //         "size": 800,
-    //         "type": "ImageStream"
-    //     },
-    //     decoder: {
-    //         readers: [readerDecodeType]
-    //     }
-    // }, function (err) {
-    //     if (err) {
-    //         console.log(err);
-    //         return
-    //     }
-    //     console.log("Initialization finished. Ready to start");
-    //     // Quagga.start();
-    //
-    // });
-
     Quagga.decodeSingle(decodeConfig, function (data) {
         console.log("decoded")
         console.log(data)
@@ -84,8 +65,6 @@ function quaggaFromFileInit(restart = true) {
             viewportDiv.prepend(img)
         }
     });
-
-    // Quagga.onProcessed(detected);
 }
 
 function quaggaStop(clearViewport = true) {
