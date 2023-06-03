@@ -56,7 +56,7 @@ func stereogram() {
 	//baseImg := pbn.LoadImage("test_images/gundam2.png")
 	//depthMap := pbn.SimpleDepthMap(baseImg)
 	//depthMap := pbn.GreyscaleDepthMap(baseImg)
-	depthMap := pbn.ColorDepthMap(baseImg)
+	depthMap, _ := pbn.ColorDepthMap(baseImg)
 	pbn.SaveImage("depthMap.png", baseImg)
 
 	pattern := pbn.SimplePatternImage(baseImg.Bounds().Dx()/10, baseImg.Bounds().Dy())
