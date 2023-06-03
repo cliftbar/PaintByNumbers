@@ -1,5 +1,5 @@
-const baseUrl = "localhost:5000"
-const apikey = "localhost"
+const baseUrl = "comments.cliftbar.site"
+const apikey = "dsc.1cc4ad05-c4f3-4f79-8695-d36801e8dfe4"
 const channelId = "1060402777429389393"
 const ws = new WebSocket("ws://" + baseUrl + "/ws/comments?auth=" + apikey + "&channelId=" + channelId.toString());
 
@@ -47,7 +47,7 @@ function postComment() {
 }
 
 function getComments() {
-    let url = "http://" + baseUrl + "/api/msg?channelId=" + channelId.toString()
+    let url = "https://" + baseUrl + "/api/msg?channelId=" + channelId.toString()
 
     fetch(url, {
         method: "GET",
