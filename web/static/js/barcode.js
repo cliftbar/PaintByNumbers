@@ -1,6 +1,22 @@
 function quaggaInit(restart = true) {
-    let readerDecodeType = document.getElementById("slct_decoderReaderType").value + "_reader"
+    let readerDecodeType = document.getElementById("slct_decoderReaderType").value
     let viewportDiv = document.getElementById("div_interactive")
+
+    let decoderConfig = {};
+    if (readerDecodeType === 'ean_extended') {
+        decoderConfig["readers"] = [{
+            format: "ean_reader",
+            config: {
+                supplements: [
+                    'ean_5_reader', 'ean_2_reader'
+                ]
+            }
+        }]
+    } else {
+        readerDecodeType = readerDecodeType + "_reader";
+        decoderConfig["readers"] = [readerDecodeType];
+    }
+
     if (restart) {
         Quagga.stop();
     }
@@ -11,9 +27,7 @@ function quaggaInit(restart = true) {
             type: "LiveStream",
             target: viewportDiv
         },
-        decoder: {
-            readers: [readerDecodeType]
-        }
+        decoder: decoderConfig
     }, function (err) {
         if (err) {
             console.log(err);
@@ -101,7 +115,14 @@ function detected(data){
 
     if (data.codeResult.format.includes("upc")) {
         upcCodeLookup(data.codeResult.code);
+    } else {
+        displayCodeOnly(data.codeResult.code);
     }
+}
+function displayCodeOnly(code){
+    let li = document.createElement("li")
+    li.appendChild(document.createTextNode(`${code}`));
+    document.getElementById("ul_thumbnails").prepend(li);
 }
 
 function upcCodeLookup(upcCode) {
