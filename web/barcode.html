@@ -21,10 +21,15 @@
       </div>
       <h1>Barcode Reader</h1>
       <p>
-        CORs checks need to be disabled in the browser for this to work, sorry.  Also, it only works for UPC codes at the moment.
+        It only works for UPC codes at the moment.
         Live Camera Capture works the best, but image upload should work as well.
+        The API key is shared and a free tier, there are 100 calls available per day.
       </p>
       <div class="controls">
+        <div id="div_apiStats">
+          <p>Calls Remaining: </p><p id="txt_apiCallsRemaining"></p>
+          <p>Resets At: </p><p id="txt_apiResetsAt"></p>
+        </div>
         <fieldset id="flds_readerConfig" class="reader-config-group">
           <legend>Reader Config</legend>
 
