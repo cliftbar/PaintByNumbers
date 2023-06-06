@@ -1,6 +1,24 @@
+let zebraApiKey = "5rOu2Qj1nBa2eBW1KWVaj6b9TdwHeaGQ";
+
 function quaggaInit(restart = true) {
-    let readerDecodeType = document.getElementById("slct_decoderReaderType").value + "_reader"
+    let readerDecodeType = document.getElementById("slct_decoderReaderType").value
     let viewportDiv = document.getElementById("div_interactive")
+
+    let decoderConfig = {};
+    if (readerDecodeType === 'ean_extended') {
+        decoderConfig["readers"] = [{
+            format: "ean_reader",
+            config: {
+                supplements: [
+                    'ean_5_reader', 'ean_2_reader'
+                ]
+            }
+        }]
+    } else {
+        readerDecodeType = readerDecodeType + "_reader";
+        decoderConfig["readers"] = [readerDecodeType];
+    }
+
     if (restart) {
         Quagga.stop();
     }
@@ -11,9 +29,7 @@ function quaggaInit(restart = true) {
             type: "LiveStream",
             target: viewportDiv
         },
-        decoder: {
-            readers: [readerDecodeType]
-        }
+        decoder: decoderConfig
     }, function (err) {
         if (err) {
             console.log(err);
@@ -55,7 +71,7 @@ function quaggaFromFileInit(restart = true) {
         console.log("decoded")
         console.log(data)
         if (data.codeResult.format.includes("upc")) {
-            upcCodeLookup(data.codeResult.code);
+            zebraCodeLookup(data.codeResult.code);
 
             let viewportDiv = document.getElementById("div_interactive")
             viewportDiv.replaceChildren();
@@ -100,8 +116,15 @@ function detected(data){
     }
 
     if (data.codeResult.format.includes("upc")) {
-        upcCodeLookup(data.codeResult.code);
+        zebraCodeLookup(data.codeResult.code);
+    } else {
+        displayCodeOnly(data.codeResult.code);
     }
+}
+function displayCodeOnly(code){
+    let li = document.createElement("li")
+    li.appendChild(document.createTextNode(`${code}`));
+    document.getElementById("ul_thumbnails").prepend(li);
 }
 
 function upcCodeLookup(upcCode) {
@@ -109,7 +132,7 @@ function upcCodeLookup(upcCode) {
     let lookupCodeUrl = `https://api.upcitemdb.com/prod/trial/lookup?upc=${upcCode}`;
 
     fetch(lookupCodeUrl, {
-        method: "GET",
+        method: "GET"
     }).then(res => {
         if (res.status !== 200) {
             alert(`Error: ${res}`)
@@ -119,6 +142,36 @@ function upcCodeLookup(upcCode) {
             data.items.forEach((item) => {
                 let li = document.createElement("li")
                 li.appendChild(document.createTextNode(`${item["upc"]}: ${item["title"]}`));
+                document.getElementById("ul_thumbnails").prepend(li);
+            })
+        })
+    })
+}
+
+function zebraCodeLookup(code, codeType="upc") {
+    let lookupUrl = `https://api.zebra.com/v2/tools/barcode/lookup?${codeType}=${code}`
+
+    fetch(lookupUrl, {
+        method: "GET",
+        headers: {
+            "apikey": zebraApiKey
+        }
+    }).then(res => {
+        if (res.status !== 200) {
+            alert(`Error: ${res}`)
+        }
+        let apiRemaining = res.headers.get("x-ratelimit-remaining");
+        let apiReset = res.headers.get("x-ratelimit-reset");
+        let apiResetDate = new Date(parseInt(apiReset) * 1000).toLocaleString()
+
+        document.getElementById("txt_apiCallsRemaining").innerHTML = apiRemaining
+        document.getElementById("txt_apiResetsAt").innerHTML = apiResetDate
+
+        res.json().then(data => {
+            console.log(data)
+            data.items.forEach((item) => {
+                let li = document.createElement("li")
+                li.appendChild(document.createTextNode(`${item[codeType]}: ${item["title"]}`));
                 document.getElementById("ul_thumbnails").prepend(li);
             })
         })
