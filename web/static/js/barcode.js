@@ -1,4 +1,5 @@
 let zebraApiKey = "5rOu2Qj1nBa2eBW1KWVaj6b9TdwHeaGQ";
+let scannedDataMap = new Map();
 
 function quaggaInit(restart = true) {
     let readerDecodeType = document.getElementById("slct_decoderReaderType").value
@@ -173,7 +174,16 @@ function zebraCodeLookup(code, codeType="upc") {
                 let li = document.createElement("li")
                 li.appendChild(document.createTextNode(`${item[codeType]}: ${item["title"]}`));
                 document.getElementById("ul_thumbnails").prepend(li);
+                scannedDataMap.set(item[codeType], item["title"])
             })
         })
     })
+}
+
+function scannedDataCopy() {
+    let scannedText = "";
+    Array.from(scannedDataMap.values()).forEach(val => {
+        scannedText = scannedText + `${val}\n`
+    })
+    navigator.clipboard.writeText(scannedText).then(() => alert(`Copied scanned list\n${scannedText}`));
 }
