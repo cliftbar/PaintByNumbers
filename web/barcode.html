@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Pixelizor Barcode</title>
     <link rel="stylesheet" href="/static/css/barcode.css">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!--<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>-->
 <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.js"></script>
     <script src="/static/js/barcode.js"></script>
@@ -50,7 +50,7 @@
           </select>
 
           <label for="slct_inputStreamResolution">Resolution (long side)</label>
-          <select id="slct_inputStreamResolution" name="inputStreamResolution" disabled>
+          <select id="slct_inputStreamResolution" name="inputStreamResolution">
             <option value="320">320px</option>
             <option value="640">640px</option>
             <option selected="selected" value="800">800px</option>
@@ -60,7 +60,7 @@
           </select>
 
           <label for="slct_locatorPatchSize">Patch-Size</label>
-          <select id="slct_locatorPatchSize" name="locatorPatchSize" disabled>
+          <select id="slct_locatorPatchSize" name="locatorPatchSize">
             <option value="x-small">x-small</option>
             <option value="small">small</option>
             <option selected="selected" value="medium">medium</option>
@@ -69,7 +69,10 @@
           </select>
 
           <label for="chbx_locatorDoHalfSample">Do Half-Sample</label>
-          <input id="chbx_locatorDoHalfSample" type="checkbox" name="locatorDoHalfSample" disabled/>
+          <input id="chbx_locatorDoHalfSample" type="checkbox" name="locatorDoHalfSample"/>
+
+          <label for="chbx_singleChannel">Do Single Channel Mode</label>
+          <input id="chbx_singleChannel" type="checkbox" name="locatorSingleChannel"/>
 
           <label for="slct_numWorkers">Worker Count</label>
           <select id="slct_numWorkers" name="numWorkers" disabled>

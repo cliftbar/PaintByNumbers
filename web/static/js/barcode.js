@@ -4,6 +4,10 @@ let scannedDataMap = new Map();
 function quaggaInit(restart = true) {
     let readerDecodeType = document.getElementById("slct_decoderReaderType").value
     let viewportDiv = document.getElementById("div_interactive")
+    let inputStreamResolution = parseInt(document.getElementById("slct_inputStreamResolution").value);
+    let patchSize = document.getElementById("slct_locatorPatchSize").value;
+    let halfSample = document.getElementById("chbx_locatorDoHalfSample").checked
+    let singleChannel = document.getElementById("chbx_singleChannel").checked
 
     let decoderConfig = {};
     if (readerDecodeType === 'ean_extended') {
@@ -25,12 +29,19 @@ function quaggaInit(restart = true) {
     }
 
     Quagga.init({
+        locate: true,
         inputStream: {
             name: "Live",
             type: "LiveStream",
-            target: viewportDiv
+            target: viewportDiv,
+            size: inputStreamResolution,
+            singleChannel: singleChannel
         },
-        decoder: decoderConfig
+        decoder: decoderConfig,
+        locator: {
+            patchSize: patchSize,
+            halfSample: halfSample
+        }
     }, function (err) {
         if (err) {
             console.log(err);
@@ -40,12 +51,20 @@ function quaggaInit(restart = true) {
         Quagga.start();
     });
 
+    Quagga.onProcessed(onProcessed);
     Quagga.onDetected(detected);
 }
+
+function onProcessed(data) {
+    console.log(data)
+}
+
 
 function quaggaFromFileInit(restart = true) {
     let fileUpload = document.getElementById("inpt_fileUpload")
     let readerDecodeType = document.getElementById("slct_decoderReaderType").value + "_reader"
+    let inputStreamResolution = parseInt(document.getElementById("slct_inputStreamResolution").value);
+
 
     if (!fileUpload.files || !fileUpload.files.length) {
         alert("Must Upload a File!")
@@ -64,7 +83,7 @@ function quaggaFromFileInit(restart = true) {
             "readers": [readerDecodeType]
         },
         "inputStream": {
-            "size": 800
+            "size": inputStreamResolution
         }
     }
 
@@ -180,10 +199,15 @@ function zebraCodeLookup(code, codeType="upc") {
     })
 }
 
+/**
+ * This function copies all the scanned data from the scannedDataMap Map object into a newline-separated string
+ * and then writes the string to the user's clipboard.
+ * When the write is successful, an alert popup displays the copied scanned list to the user.
+ */
 function scannedDataCopy() {
     let scannedText = "";
-    Array.from(scannedDataMap.values()).forEach(val => {
-        scannedText = scannedText + `${val}\n`
-    })
+    for (let value of scannedDataMap.values()) {
+        scannedText += value + "\n";
+    }
     navigator.clipboard.writeText(scannedText).then(() => alert(`Copied scanned list\n${scannedText}`));
 }
