@@ -5,3 +5,4 @@
 bar.html
 *.exe
 *.log
+.fleet
