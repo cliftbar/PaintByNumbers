@@ -13,3 +13,56 @@
 #div_interactive.viewport canvas.drawingBuffer, video.drawingBuffer {
     margin-left: -640px;
 }
+
+/* ai generated */
+#div_apiStats p {
+    display: inline;
+    margin-right: 5px;
+}
+
+.reader-config-group {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.reader-config-group legend {
+  padding: 0 5px;
+}
+
+.reader-config-group label {
+  margin-left: 10px;
+  margin-right: 10px; /* increased space after labels */
+}
+
+.barcode-run-types {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+}
+
+.input-group {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.input-group legend {
+    padding: 0 5px;
+}
+
+/* Responsible layout for mobile devices */
+@media screen and (max-width: 600px) {
+    .barcode-run-types {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+  .input-group {
+        max-width: 100%;
+        margin: 10px 0; /* Adjust margins for smaller screens */
+    }
+}
