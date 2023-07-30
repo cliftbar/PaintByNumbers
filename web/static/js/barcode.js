@@ -10,7 +10,7 @@ function quaggaInit(restart = true) {
     let singleChannel = document.getElementById("chbx_singleChannel").checked
 
     let decoderConfig = {};
-    if (readerDecodeType === 'ean_extended') {
+    if (readerDecodeType === "ean_extended") {
         decoderConfig["readers"] = [{
             format: "ean_reader",
             config: {
@@ -19,6 +19,12 @@ function quaggaInit(restart = true) {
                 ]
             }
         }]
+    } else if(readerDecodeType === "try_common_long") {
+        decoderConfig["readers"] = ["upc_reader", "ean_reader"]
+        decoderConfig["multiple"] = false
+    } else if(readerDecodeType === "try_common_short") {
+        decoderConfig["readers"] = ["upc_e_reader", "ean_8_reader"]
+        decoderConfig["multiple"] = false
     } else {
         readerDecodeType = readerDecodeType + "_reader";
         decoderConfig["readers"] = [readerDecodeType];
@@ -34,6 +40,11 @@ function quaggaInit(restart = true) {
             name: "Live",
             type: "LiveStream",
             target: viewportDiv,
+            constraints: {
+                facingMode: 'environment',
+                focusMode: 'continuous', // Enable continuous autofocus
+                zoom: 'auto' // Enable autozoom if supported
+            },
             size: inputStreamResolution,
             singleChannel: singleChannel
         },
@@ -52,7 +63,7 @@ function quaggaInit(restart = true) {
     });
 
     Quagga.onProcessed(onProcessed);
-    Quagga.onDetected(detected);
+    Quagga.onDetected(callbackThrottle(detected, 2000));
 }
 
 function onProcessed(data) {
@@ -90,7 +101,7 @@ function quaggaFromFileInit(restart = true) {
     Quagga.decodeSingle(decodeConfig, function (data) {
         console.log("decoded")
         console.log(data)
-        if (data.codeResult.format.includes("upc")) {
+        if (data.codeResult.format.includes("upc") || data.codeResult.format.includes("ean")) {
             zebraCodeLookup(data.codeResult.code);
 
             let viewportDiv = document.getElementById("div_interactive")
@@ -137,6 +148,8 @@ function detected(data){
 
     if (data.codeResult.format.includes("upc")) {
         zebraCodeLookup(data.codeResult.code);
+    } else if(data.codeResult.format.includes("ean")) {
+        zebraCodeLookup(data.codeResult.code, "ean");
     } else {
         displayCodeOnly(data.codeResult.code);
     }
@@ -169,7 +182,7 @@ function upcCodeLookup(upcCode) {
 }
 
 function zebraCodeLookup(code, codeType="upc") {
-    let lookupUrl = `https://api.zebra.com/v2/tools/barcode/lookup?${codeType}=${code}`
+    let lookupUrl = `https://api.zebra.com/v2/tools/barcode/lookup?upc=${code}`
 
     fetch(lookupUrl, {
         method: "GET",
@@ -177,9 +190,7 @@ function zebraCodeLookup(code, codeType="upc") {
             "apikey": zebraApiKey
         }
     }).then(res => {
-        if (res.status !== 200) {
-            alert(`Error: ${res}`)
-        }
+
         let apiRemaining = res.headers.get("x-ratelimit-remaining");
         let apiReset = res.headers.get("x-ratelimit-reset");
         let apiResetDate = new Date(parseInt(apiReset) * 1000).toLocaleString()
@@ -187,15 +198,23 @@ function zebraCodeLookup(code, codeType="upc") {
         document.getElementById("txt_apiCallsRemaining").innerHTML = apiRemaining
         document.getElementById("txt_apiResetsAt").innerHTML = apiResetDate
 
-        res.json().then(data => {
-            console.log(data)
-            data.items.forEach((item) => {
+        if (res.status !== 200) {
+            res.text().then( t => {
                 let li = document.createElement("li")
-                li.appendChild(document.createTextNode(`${item[codeType]}: ${item["title"]}`));
+                li.appendChild(document.createTextNode(`${codeType.toUpperCase()} ${code}: ${t}`));
                 document.getElementById("ul_thumbnails").prepend(li);
-                scannedDataMap.set(item[codeType], item["title"])
+            });
+        } else {
+            res.json().then(data => {
+                console.log(data)
+                data.items.forEach((item) => {
+                    let li = document.createElement("li")
+                    li.appendChild(document.createTextNode(`${codeType.toUpperCase()} ${item[codeType]}: ${item["title"]}`));
+                    document.getElementById("ul_thumbnails").prepend(li);
+                    scannedDataMap.set(item[codeType], item["title"])
+                })
             })
-        })
+        }
     })
 }
 
