@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Pixelizor Barcode</title>
+    <link rel="stylesheet" href="/static/css/shared.css">
     <link rel="stylesheet" href="/static/css/barcode.css">
     <!--<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>-->
 <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>-->
@@ -84,16 +85,18 @@
           </select>
         </fieldset>
         <br />
-        <fieldset id="flds_fileInput" class="input-group">
-          <legend>Barcode Image Upload</legend>
-          <input id="inpt_fileUpload" type="file" accept="image/*;capture=camera"/>
-          <button id="btn_runFileUploadRead" onclick="quaggaFromFileInit()">Run On File</button>
-        </fieldset>
-        <fieldset id="flds_liveCapture" class="input-group">
-          <legend>Live Camera Capture</legend>
-          <button id="btn_runLiveCapture" onclick="quaggaInit()">Run Live Capture</button>
-          <button id="btn_stopLiveCapture" onclick="quaggaStop()">Stop Live Capture</button>
-        </fieldset>
+        <div class="barcode-run-types">
+          <fieldset id="flds_fileInput" class="input-group">
+            <legend>Barcode Image Upload</legend>
+            <input id="inpt_fileUpload" type="file" accept="image/*;capture=camera"/>
+            <button id="btn_runFileUploadRead" onclick="quaggaFromFileInit()">Run On File</button>
+          </fieldset>
+          <fieldset id="flds_liveCapture" class="input-group">
+            <legend>Live Camera Capture</legend>
+            <button id="btn_runLiveCapture" onclick="quaggaInit()">Run Live Capture</button>
+            <button id="btn_stopLiveCapture" onclick="quaggaStop()">Stop Live Capture</button>
+          </fieldset>
+        </div>
       </div>
       <br />
       <div id="div_interactive" class="viewport"></div>
