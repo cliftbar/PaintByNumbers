@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -9,6 +9,7 @@
     <!--<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>-->
 <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.js"></script>
+    <script src="/static/js/utils.js"></script>
     <script src="/static/js/barcode.js"></script>
 
 
@@ -22,9 +23,9 @@
       </div>
       <h1>Barcode Reader</h1>
       <p>
-        It only works for UPC codes at the moment.
         Live Camera Capture works the best, but image upload should work as well.
-        The API key is shared and a free tier, there are 100 calls available per day.
+        The API key is shared and a free tier, there are limited calls available per day.
+        If you have trouble detecting the code, enable half-sample, then try changing the resolution to 1280px.  After that, just try options.
       </p>
       <div class="controls">
         <div id="div_apiStats">
@@ -36,14 +37,16 @@
 
           <label for="slct_decoderReaderType">Barcode Type</label>
           <select id="slct_decoderReaderType" name="decoderReaderType">
-            <option value="upc" selected>UPC</option>
+            <option value="try_common_long" selected>Try Common Long (UPC-A, EAN 13)</option>
+            <option value="try_common_short">Try Common Short (UPC-E, EAN-8)</option>
+            <option value="upc">UPC A (12 digits)</option>
             <option value="code_128"x>Code 128</option>
             <option value="code_39">Code 39</option>
             <option value="code_39_vin">Code 39 VIN</option>
-            <option value="ean">EAN</option>
-            <option value="ean_extended">EAN-extended</option>
+            <option value="ean">EAN 13</option>
+            <option value="ean_extended">EAN-extended (2, 5 digits)</option>
             <option value="ean_8">EAN-8</option>
-            <option value="upc_e">UPC-E</option>
+            <option value="upc_e">UPC-E (6 digits)</option>
             <option value="codabar">Codabar</option>
             <option value="i2of5">ITF</option>
             <option value="2of5">Standard 2 of 5</option>

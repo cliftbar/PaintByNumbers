@@ -53,3 +53,16 @@ function useWorker(worker, params, msgCallback) {
 function terminateWorker(worker) {
     worker.webWorker.terminate();
 }
+
+let lastCall = 0;
+function callbackThrottle(callback, limit) {
+    return function() {
+        const now = Date.now();
+        if (now - lastCall >= limit) {
+            lastCall = now;
+            return callback.apply(this, arguments);
+        } else {
+            console.log("throttled " + callback.name)
+        }
+    };
+}
